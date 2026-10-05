@@ -28,13 +28,26 @@ def parse_hosts(raw: str | None) -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def parse_origins(raw: str | None, defaults: list[str]) -> list[str]:
+    if not raw:
+        return defaults
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise ImproperlyConfigured("The SECRET_KEY environment variable must be set.")
 DEBUG = get_bool("DEBUG", True)
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5500")
 ALLOWED_HOSTS = parse_hosts(os.getenv("ALLOWED_HOSTS")) + ["testserver"]
-CSRF_TRUSTED_ORIGINS = [FRONTEND_ORIGIN]
+CORS_ALLOWED_ORIGINS = parse_origins(
+    os.getenv("CORS_ALLOWED_ORIGINS"),
+    ["http://localhost:5173", "http://localhost:5500"],
+)
+CSRF_TRUSTED_ORIGINS = parse_origins(
+    os.getenv("CSRF_TRUSTED_ORIGINS"),
+    ["http://localhost:5173", "http://localhost:5500", FRONTEND_ORIGIN],
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -51,6 +64,7 @@ INSTALLED_APPS = [
     "auto_reminder",
     "final_academic_insights",
     "academic_report",
+    "api",
 ]
 
 MIDDLEWARE = [
@@ -150,9 +164,10 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS_ALLOWED_ORIGINS = [FRONTEND_ORIGIN]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = "Lax"
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False

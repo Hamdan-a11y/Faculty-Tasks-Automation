@@ -22,5 +22,6 @@ urlpatterns = [
     path("auto-reminders/", include("auto_reminder.urls")),
     path("final-academic-insights/", include("final_academic_insights.urls")),
     path("academic-report/", include("academic_report.urls")),
+    path("api/", include("api.urls")),
     path("", auth_views.home_redirect, name="home"),
 ]
