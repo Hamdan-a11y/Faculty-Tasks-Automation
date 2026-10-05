@@ -1,6 +1,8 @@
 """Curriculum parsing and automated course outline submission."""
 
 import os
+import json
+import uuid
 import re
 import time
 import tempfile
@@ -20,6 +22,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import (
+    InvalidSessionIdException,
     TimeoutException,
     NoSuchElementException,
     WebDriverException,

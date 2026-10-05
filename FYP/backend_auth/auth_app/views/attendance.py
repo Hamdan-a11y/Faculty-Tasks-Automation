@@ -3,6 +3,7 @@
 import os
 import json
 import time
+import requests
 
 from django.conf import settings
 from django.http import JsonResponse

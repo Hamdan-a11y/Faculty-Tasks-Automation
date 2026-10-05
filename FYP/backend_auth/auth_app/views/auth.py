@@ -3,8 +3,11 @@
 import os
 import json
 import requests
+import uuid
+from datetime import timedelta
 
 from django.conf import settings
+from django.db import DatabaseError
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -25,6 +28,9 @@ from auth_app.auth_service import (
     refresh_access_token,
 )
 from auth_app.models import (
+    ClassroomCourse,
+    ClassroomCoursework,
+    DriveFile,
     FacultyUser,
     GoogleServiceToken,
 )
