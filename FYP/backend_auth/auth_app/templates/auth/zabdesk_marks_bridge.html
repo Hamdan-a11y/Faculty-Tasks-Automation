@@ -1,0 +1,676 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zabdesk Marks Bridge | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <style>
+    .bridge-wrap {
+      display: grid;
+      gap: 16px;
+    }
+
+    .bridge-head h2 {
+      margin: 0;
+      font-size: 1.9rem;
+      color: #13293d;
+    }
+
+    .bridge-head p {
+      margin: 8px 0 0;
+      color: #5d748e;
+    }
+
+    .bridge-card {
+      background: #fff;
+      border: 1px solid #e4ebf3;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(16, 32, 48, 0.05);
+      padding: 28px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(190px, 1fr));
+      gap: 20px;
+    }
+
+    .action-btn {
+      align-items: center;
+      background: linear-gradient(135deg, #2686c3, #0f5f90);
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(15, 95, 144, 0.28);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      font-size: 1.02rem;
+      font-weight: 700;
+      gap: 12px;
+      justify-content: center;
+      min-height: 130px;
+      padding: 18px 14px;
+      text-align: center;
+      transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+    }
+
+    .action-btn:hover {
+      filter: brightness(1.03);
+      transform: translateY(-2px);
+    }
+
+    .action-btn:disabled {
+      cursor: wait;
+      opacity: 0.72;
+      transform: none;
+    }
+
+    .btn-icon {
+      height: 34px;
+      width: 34px;
+    }
+
+    .dropdown.show {
+      display: block;
+    }
+
+    .upload-status {
+      color: #1f4260;
+      font-size: 0.92rem;
+      margin: 12px 0 0;
+      min-height: 20px;
+    }
+
+    .extract-output {
+      background: #f7fbff;
+      border: 1px solid #d6e4ef;
+      border-radius: 10px;
+      color: #17364d;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      margin: 12px 0 0;
+      max-height: 320px;
+      overflow: auto;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .marks-modal {
+      align-items: center;
+      background: rgba(10, 28, 44, 0.42);
+      display: none;
+      inset: 0;
+      justify-content: center;
+      padding: 18px;
+      position: fixed;
+      z-index: 1200;
+    }
+
+    .marks-modal.show {
+      display: flex;
+    }
+
+    .marks-modal-card {
+      background: #fff;
+      border: 1px solid #dce8f2;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(12, 43, 66, 0.24);
+      max-width: 680px;
+      padding: 22px 22px 18px;
+      width: 100%;
+    }
+
+    .marks-modal-card h3 {
+      color: #13293d;
+      font-size: 1.18rem;
+      margin: 0 0 14px;
+    }
+
+    .marks-options {
+      display: grid;
+      gap: 10px 14px;
+      grid-template-columns: repeat(2, minmax(200px, 1fr));
+      margin: 0;
+    }
+
+    .marks-options label {
+      align-items: center;
+      background: #f6fbff;
+      border: 1px solid #dbe9f5;
+      border-radius: 10px;
+      color: #1a3d57;
+      cursor: pointer;
+      display: flex;
+      font-size: 0.94rem;
+      font-weight: 600;
+      gap: 10px;
+      min-height: 42px;
+      padding: 10px 12px;
+    }
+
+    .marks-options input[type="radio"] {
+      accent-color: #1a7dbe;
+      cursor: pointer;
+      height: 15px;
+      width: 15px;
+    }
+
+    .marks-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .modal-btn {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 700;
+      min-width: 110px;
+      padding: 10px 14px;
+      transition: filter 120ms ease;
+    }
+
+    .modal-btn:disabled {
+      cursor: wait;
+      opacity: 0.6;
+    }
+
+    .modal-btn:hover {
+      filter: brightness(1.03);
+    }
+
+    .modal-btn-secondary {
+      background: #e7eef6;
+      color: #234663;
+    }
+
+    .modal-btn-primary {
+      background: linear-gradient(135deg, #2686c3, #0f5f90);
+      color: #fff;
+    }
+
+    .bridge-toast {
+      background: #103a57;
+      border-radius: 10px;
+      bottom: 18px;
+      box-shadow: 0 12px 24px rgba(9, 34, 53, 0.24);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 600;
+      max-width: 540px;
+      opacity: 0;
+      padding: 10px 14px;
+      pointer-events: none;
+      position: fixed;
+      right: 18px;
+      transform: translateY(10px);
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 1300;
+    }
+
+    .bridge-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bridge-toast.error {
+      background: #9e2a2f;
+    }
+
+    @media (max-width: 1100px) {
+      .action-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+      }
+    }
+
+    @media (max-width: 740px) {
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .marks-options {
+        grid-template-columns: 1fr;
+      }
+
+      .marks-actions {
+        flex-direction: column-reverse;
+      }
+
+      .modal-btn {
+        width: 100%;
+      }
+
+      .bridge-toast {
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer</a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration</a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item active" href="{% url 'auth_app:zabdesk_marks_bridge' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item" href="{% url 'auth_app:midterm_academic_evaluator' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator</a>
+        <a class="nav-item" href="{% url 'auth_app:student_outreach_assistant' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant</a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome">Welcome, {{ user_name|default:"Faculty" }}</div>
+        <div class="topbar-actions">
+          <button class="icon-btn" aria-label="Notifications"><img src="{% static 'auth/icons/bell.svg' %}" alt="" /></button>
+          <button class="icon-btn" aria-label="Settings"><img src="{% static 'auth/icons/settings.svg' %}" alt="" /></button>
+          <form action="{% url 'auth_app:logout' %}" method="get" style="margin:0;">
+            <button class="logout-btn" type="submit" title="Sign out">
+              <span class="logout-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="1.4" fill="none" />
+                  <path d="M13.5 8.5L9.5 12L13.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M10 12H16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>Logout</span>
+            </button>
+          </form>
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn" type="button">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+            <div class="dropdown" id="userMenu">
+              <a href="#">Profile</a>
+              <a href="#">Preferences</a>
+              <a href="{% url 'auth_app:logout' %}">Sign out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="bridge-wrap" aria-label="Zabdesk marks bridge actions">
+        <div class="bridge-head">
+          <h2>Zabdesk Marks Bridge</h2>
+          <p>Synchronize and transfer marks effortlessly between external data sources and Zabdesk.</p>
+        </div>
+
+        <div class="bridge-card">
+          <div class="action-grid">
+            <button id="login-zabdesk-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+              Login To Zabdesk
+            </button>
+
+            <button id="upload-excel-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Upload Excel Sheet
+            </button>
+
+            <button id="extract-excel-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Extract Data From Excel Sheet
+            </button>
+
+            <button id="enter-marks-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              Enter Marks In The Recap Sheet
+            </button>
+          </div>
+          <input id="excel-file-input" type="file" accept=".xlsx,.xls,.csv" style="display:none;" />
+          <p id="upload-status" class="upload-status" aria-live="polite"></p>
+          <pre id="extract-output" class="extract-output" aria-live="polite" style="display:none;"></pre>
+          <p id="enter-status" class="upload-status" aria-live="polite"></p>
+          <pre id="enter-summary" class="extract-output" aria-live="polite" style="display:none;"></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="marks-modal" class="marks-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="marks-modal-title">
+    <div class="marks-modal-card">
+      <h3 id="marks-modal-title">Which marks do you want to enter?</h3>
+      <form id="marks-form" class="marks-options">
+        <label><input type="radio" name="marks-type" value="quiz_1" checked /> Quiz 1 (4.5 marks)</label>
+        <label><input type="radio" name="marks-type" value="quiz_2" /> Quiz 2 (4.5 marks)</label>
+        <label><input type="radio" name="marks-type" value="quiz_3" /> Quiz 3 (4.5 marks)</label>
+        <label><input type="radio" name="marks-type" value="quiz_4" /> Quiz 4 (4.5 marks)</label>
+        <label><input type="radio" name="marks-type" value="assignment_1" /> Assignment 1 (3 marks)</label>
+        <label><input type="radio" name="marks-type" value="assignment_2" /> Assignment 2 (3 marks)</label>
+        <label><input type="radio" name="marks-type" value="assignment_3" /> Assignment 3 (3 marks)</label>
+        <label><input type="radio" name="marks-type" value="assignment_4" /> Assignment 4 (3 marks)</label>
+        <label><input type="radio" name="marks-type" value="mid_term_paper" /> Mid Term (30 marks)</label>
+        <label><input type="radio" name="marks-type" value="final_paper" /> Final Term (40 marks)</label>
+      </form>
+      <div class="marks-actions">
+        <button id="marks-cancel-btn" type="button" class="modal-btn modal-btn-secondary">Cancel</button>
+        <button id="marks-confirm-btn" type="button" class="modal-btn modal-btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bridge-toast" class="bridge-toast" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      const userBtn = document.getElementById('userBtn');
+      const userMenu = document.getElementById('userMenu');
+      if (userBtn && userMenu) {
+        userBtn.addEventListener('click', function () {
+          userMenu.classList.toggle('show');
+        });
+        document.addEventListener('click', function (event) {
+          if (!userBtn.contains(event.target) && !userMenu.contains(event.target)) {
+            userMenu.classList.remove('show');
+          }
+        });
+      }
+
+      const loginBtn = document.getElementById('login-zabdesk-btn');
+      const uploadBtn = document.getElementById('upload-excel-btn');
+      const extractBtn = document.getElementById('extract-excel-btn');
+      const enterBtn = document.getElementById('enter-marks-btn');
+      const fileInput = document.getElementById('excel-file-input');
+      const uploadStatus = document.getElementById('upload-status');
+      const extractOutput = document.getElementById('extract-output');
+      const enterStatus = document.getElementById('enter-status');
+      const enterSummary = document.getElementById('enter-summary');
+      const marksModal = document.getElementById('marks-modal');
+      const marksForm = document.getElementById('marks-form');
+      const marksCancelBtn = document.getElementById('marks-cancel-btn');
+      const marksConfirmBtn = document.getElementById('marks-confirm-btn');
+      const bridgeToast = document.getElementById('bridge-toast');
+
+      const marksTypeLabels = {
+        quiz_1: 'Quiz 1 (4.5 marks)',
+        quiz_2: 'Quiz 2 (4.5 marks)',
+        quiz_3: 'Quiz 3 (4.5 marks)',
+        quiz_4: 'Quiz 4 (4.5 marks)',
+        assignment_1: 'Assignment 1 (3 marks)',
+        assignment_2: 'Assignment 2 (3 marks)',
+        assignment_3: 'Assignment 3 (3 marks)',
+        assignment_4: 'Assignment 4 (3 marks)',
+        mid_term_paper: 'Mid Term (30 marks)',
+        final_paper: 'Final Term (40 marks)',
+      };
+
+      if (!loginBtn) return;
+
+      function showToast(message, isError) {
+        if (!bridgeToast) return;
+        bridgeToast.textContent = message || '';
+        bridgeToast.classList.toggle('error', !!isError);
+        bridgeToast.classList.add('show');
+        window.setTimeout(function () {
+          bridgeToast.classList.remove('show');
+        }, 3600);
+      }
+
+      function openMarksModal() {
+        if (!marksModal) return;
+        marksModal.classList.add('show');
+        marksModal.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeMarksModal() {
+        if (!marksModal) return;
+        marksModal.classList.remove('show');
+        marksModal.setAttribute('aria-hidden', 'true');
+      }
+
+      function selectedMarksType() {
+        if (!marksForm) return null;
+        const checked = marksForm.querySelector('input[name="marks-type"]:checked');
+        if (!checked) return null;
+        return {
+          value: checked.value,
+          label: marksTypeLabels[checked.value] || checked.value,
+        };
+      }
+
+      loginBtn.addEventListener('click', async function () {
+        const btn = this;
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Connecting...';
+
+        try {
+          const response = await fetch("{% url 'auth_app:zabdesk_auto_login' %}");
+          const result = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(result.message || 'Unable to complete automation.');
+          }
+
+          console.log('Zabdesk automation completed', result);
+          showToast(result.message || 'ZabDesk login automation completed.', false);
+        } catch (error) {
+          console.error('Zabdesk automation failed:', error);
+          showToast(error.message || 'Automation failed.', true);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      });
+
+      if (uploadBtn && fileInput && uploadStatus) {
+        uploadBtn.addEventListener('click', function () {
+          fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async function () {
+          const selectedFile = fileInput.files && fileInput.files[0];
+          if (!selectedFile) return;
+
+          const btnOriginal = uploadBtn.innerHTML;
+          uploadBtn.disabled = true;
+          uploadBtn.innerHTML = 'Uploading...';
+          uploadStatus.textContent = 'Uploading ' + selectedFile.name + '...';
+
+          try {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const response = await fetch("{% url 'auth_app:zabdesk_upload_excel' %}", {
+              method: 'POST',
+              body: formData,
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+              throw new Error(result.error || 'Upload failed.');
+            }
+
+            uploadStatus.textContent = (result.file_name || selectedFile.name) + ' uploaded successfully.';
+          } catch (error) {
+            console.error('Excel upload failed:', error);
+            uploadStatus.textContent = error.message || 'Upload failed.';
+          } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = btnOriginal;
+            fileInput.value = '';
+          }
+        });
+      }
+
+      if (extractBtn && extractOutput) {
+        extractBtn.addEventListener('click', async function () {
+          const originalHtml = extractBtn.innerHTML;
+          extractBtn.disabled = true;
+          extractBtn.innerHTML = 'Extracting...';
+          extractOutput.style.display = 'block';
+          extractOutput.textContent = 'Extracting all data from the uploaded sheet...';
+
+          try {
+            const response = await fetch("{% url 'auth_app:zabdesk_extract_excel_data' %}");
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+              throw new Error(result.error || 'Extraction failed.');
+            }
+
+            extractOutput.textContent = JSON.stringify(result, null, 2);
+          } catch (error) {
+            console.error('Excel extraction failed:', error);
+            extractOutput.textContent = error.message || 'Extraction failed.';
+          } finally {
+            extractBtn.disabled = false;
+            extractBtn.innerHTML = originalHtml;
+          }
+        });
+      }
+
+      if (enterBtn && marksModal && marksConfirmBtn && marksCancelBtn) {
+        enterBtn.addEventListener('click', function () {
+          if (enterSummary) {
+            enterSummary.style.display = 'none';
+            enterSummary.textContent = '';
+          }
+          openMarksModal();
+        });
+
+        marksCancelBtn.addEventListener('click', function () {
+          closeMarksModal();
+        });
+
+        marksModal.addEventListener('click', function (event) {
+          if (event.target === marksModal) {
+            closeMarksModal();
+          }
+        });
+
+        marksConfirmBtn.addEventListener('click', async function () {
+          const selected = selectedMarksType();
+          if (!selected) {
+            showToast('Please select a marks type first.', true);
+            return;
+          }
+
+          const originalLabel = enterBtn.innerHTML;
+          enterBtn.disabled = true;
+          enterBtn.innerHTML = 'Entering...';
+          marksConfirmBtn.disabled = true;
+          marksCancelBtn.disabled = true;
+          closeMarksModal();
+
+          if (enterSummary) {
+            enterSummary.style.display = 'none';
+            enterSummary.textContent = '';
+          }
+          if (enterStatus) {
+            enterStatus.textContent = 'Entering ' + selected.label + ' marks in the recap sheet...';
+          }
+
+          try {
+            const response = await fetch('/auth/zabdesk-enter-marks/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ marks_type: selected.value }),
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              if (enterSummary && Array.isArray(result.detected_headers) && result.detected_headers.length) {
+                enterSummary.textContent = [
+                  'Detected headers from uploaded sheet:',
+                  '',
+                  ...result.detected_headers.map(function (h, idx) {
+                    return (idx + 1) + '. ' + (h || '(empty)');
+                  })
+                ].join('\n');
+                enterSummary.style.display = 'block';
+              }
+              throw new Error(result.error || result.message || 'Unable to enter marks in recap sheet.');
+            }
+
+            const serverMessage = result.message || (selected.label + ' marks entered.');
+            if (enterStatus) {
+              enterStatus.textContent = serverMessage;
+            }
+
+            const failures = Array.isArray(result.failures) ? result.failures : [];
+            if (failures.length && enterSummary) {
+              const lines = [
+                'Error Summary:',
+                '',
+              ];
+
+              failures.slice(0, 120).forEach(function (failure, index) {
+                const reg = failure.registration_no || 'N/A';
+                const name = failure.name || 'N/A';
+                const reason = failure.reason || 'Unknown issue';
+                lines.push((index + 1) + '. [' + reg + '] ' + name + ' - ' + reason);
+              });
+
+              if (failures.length > 120) {
+                lines.push('... and ' + (failures.length - 120) + ' more failures.');
+              }
+
+              enterSummary.textContent = lines.join('\n');
+              enterSummary.style.display = 'block';
+              showToast(serverMessage, true);
+            } else {
+              showToast(serverMessage, false);
+            }
+          } catch (error) {
+            console.error('Recap sheet entry failed:', error);
+            if (enterStatus) {
+              enterStatus.textContent = error.message || 'Recap sheet entry failed.';
+            }
+            showToast(error.message || 'Recap sheet entry failed.', true);
+          } finally {
+            enterBtn.disabled = false;
+            enterBtn.innerHTML = originalLabel;
+            marksConfirmBtn.disabled = false;
+            marksCancelBtn.disabled = false;
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

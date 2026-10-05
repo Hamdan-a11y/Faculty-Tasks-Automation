@@ -1,0 +1,1 @@
+# Academic Report Generator App

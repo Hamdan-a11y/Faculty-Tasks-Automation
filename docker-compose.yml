@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16
+    container_name: faculty_tasks_db
+    restart: always
+    environment:
+      POSTGRES_DB: faculty_tasks
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Django Backend
+  django:
+    build:
+      context: ./FYP/backend_auth
+      dockerfile: Dockerfile
+    container_name: faculty_tasks_automation_django
+    volumes:
+      - ./FYP/backend_auth:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./FYP/backend_auth/.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/faculty_tasks
+
+volumes:
+  postgres_data:

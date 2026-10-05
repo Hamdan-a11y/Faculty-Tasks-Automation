@@ -1,0 +1,347 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Google Services Integration | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/google-services/styles.css' %}?v=7" />
+</head>
+<body data-google-connected="{{ google_connected|yesno:'true,false' }}" data-connect-url="{{ google_connect_url }}" data-disconnect-url="{% url 'auth_app:google_services_disconnect' %}" data-token-expiry="{{ token_expires_at }}">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer</a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item active" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration</a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item" href="{% url 'auth_app:zabdesk_marks_bridge' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item" href="{% url 'auth_app:midterm_academic_evaluator' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator</a>
+        <a class="nav-item" href="{% url 'auth_app:student_outreach_assistant' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant</a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name" id="facultyName">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <div class="welcome">Google Services Integration</div>
+          <div class="status-hint">Google Classroom, Drive, uploads, and assignments.</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" type="button" aria-label="Notifications"><img src="{% static 'auth/icons/bell.svg' %}" alt="" /></button>
+          <button class="icon-btn" type="button" aria-label="Settings"><img src="{% static 'auth/icons/settings.svg' %}" alt="" /></button>
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+            <div class="dropdown" id="userMenu">
+              <a href="#">Profile</a>
+              <a href="#">Preferences</a>
+              <a href="{% url 'auth_app:logout' %}">Sign out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="main">
+        <section class="hero card" aria-label="Module overview">
+          <div>
+            <p class="eyebrow">Integration suite</p>
+            <h1>Connect ZABDESK with Google Classroom &amp; Drive</h1>
+            <p class="lede">Authorize Classroom and Drive access once, then reuse the stored token silently for Classroom syncs, Drive uploads, and lecture automations.</p>
+            <div class="badges">
+              <span class="badge badge-soft">One-time consent</span>
+              <span class="badge badge-primary">Domain restricted</span>
+              <span class="badge badge-outline">Token reuse</span>
+            </div>
+          </div>
+          <div class="status-block">
+            <div class="status-label">Next step</div>
+            <div class="status-value" id="statusValue">{% if google_connected %}Google Connected ✓{% else %}Connect Google Services{% endif %}</div>
+            <p class="status-hint">{% if google_connected %}Tokens saved for Classroom and Drive scopes. Future API calls will reuse silently.{% else %}You will be redirected once to grant Classroom and Drive scopes. Session must already be active.{% endif %}</p>
+            <div class="status-actions">
+              <button class="btn ghost danger disconnect-btn" type="button">Disconnect Google</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-label="Google integrations">
+          <div class="section-head">
+            <div>
+              <h2>Integration Actions</h2>
+              <p class="section-sub">Four flows that will connect to Google services. Actions are placeholders with clear hand-offs.</p>
+            </div>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="14" rx="2" ry="2" />
+                  <path d="M3 8h18" />
+                  <path d="M7 12h4" />
+                </svg>
+              </div>
+              <div class="feature-body">
+                <div class="feature-top">
+                  <h3>Google Classroom Sync</h3>
+                  <span class="pill">{{ google_connected|yesno:'Google Connected ✓,Connect Google Services' }}</span>
+                </div>
+                <p>Synchronize class rosters, assignments, and course shells with Classroom.</p>
+                <button class="btn action-btn" data-feature="Classroom Sync" type="button" {% if google_connected %}disabled{% endif %}>{{ google_connected|yesno:'Google Connected ✓,Connect Google Services' }}</button>
+                <!-- Future: trigger backend endpoint to fetch Classroom courses and store mapping -->
+              </div>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <path d="M8 7h8" />
+                  <path d="M8 12h8" />
+                  <path d="M8 17h5" />
+                </svg>
+              </div>
+              <div class="feature-body">
+                <div class="feature-top">
+                  <h3>Google Drive File Integration</h3>
+                  <span class="pill">{{ google_connected|yesno:'Google Connected ✓,Connect Google Services' }}</span>
+                </div>
+                <p>Browse course folders, attach lecture decks, and stage uploads to Drive.</p>
+                <button class="btn action-btn" data-feature="Drive Integration" type="button" {% if google_connected %}disabled{% endif %}>{{ google_connected|yesno:'Google Connected ✓,Connect Google Services' }}</button>
+                <!-- Future: call backend to list Drive folders and pre-sign uploads -->
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        <section class="card" aria-label="Drive upload live hook">
+          <div class="section-head">
+            <div>
+              <h2>Google Drive Upload</h2>
+              <p class="section-sub">Upload a lecture file to a Drive folder using the stored token.</p>
+            </div>
+            <div class="section-meta">Live hook</div>
+          </div>
+
+          <form id="driveUploadForm" class="drive-upload-form">
+            <div class="form-grid">
+              <label class="form-field">
+                <span class="label">Drive folder ID (optional)</span>
+                <input type="text" id="driveFolderInput" name="folder_id" placeholder="root or folder ID" />
+              </label>
+              <label class="form-field">
+                <span class="label">Lecture file</span>
+                <input type="file" id="driveFileInput" name="file" />
+              </label>
+            </div>
+            <div class="form-actions">
+              <button class="btn primary" type="submit">Upload to Drive</button>
+              <span id="driveUploadStatus" class="status-hint">Awaiting upload.</span>
+            </div>
+          </form>
+
+          <div id="driveUploadsList" class="upload-list" aria-live="polite"></div>
+          <div class="status-hint">Deleting an upload removes it from Drive and refreshes this list.</div>
+
+          <div class="sub-section">
+            <div class="section-head compact">
+              <div>
+                <h3>Upload to Drive + Classroom</h3>
+                <div class="section-sub">Upload the file to Drive and attach as course material in one step.</div>
+              </div>
+            </div>
+            <form id="materialForm" class="drive-upload-form">
+              <div class="form-grid">
+                <label class="form-field">
+                  <span class="label">Google Classroom course</span>
+                  <select id="materialCourseSelect" name="course_id">
+                    <option value="">-- Select a course --</option>
+                  </select>
+                </label>
+                <label class="form-field">
+                  <span class="label">Material title</span>
+                  <input type="text" id="materialTitle" name="title" placeholder="Lecture material" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Drive folder ID (optional)</span>
+                  <input type="text" id="materialFolder" name="folder_id" placeholder="root or folder ID" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Use existing Drive file (optional)</span>
+                  <select id="materialDriveFile" name="drive_file_id">
+                    <option value="">-- None --</option>
+                  </select>
+                </label>
+                <label class="form-field">
+                  <span class="label">Upload file (PDF, etc.)</span>
+                  <input type="file" id="materialFile" name="file" />
+                </label>
+              </div>
+              <label class="form-field">
+                <span class="label">Description (optional)</span>
+                <input type="text" id="materialDescription" name="description" placeholder="Short note for students" />
+              </label>
+              <div class="form-actions">
+                <button class="btn primary" type="submit">Upload to Drive + Classroom</button>
+                <span id="materialStatus" class="status-hint">Idle.</span>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="card" aria-label="Classroom course and coursework">
+          <div class="section-head">
+            <div>
+              <h2>Google Classroom</h2>
+              <p class="section-sub">List your courses and publish an assignment with an attached Drive file.</p>
+            </div>
+            <div class="section-meta">Live hook</div>
+          </div>
+
+          <div class="classroom-panel">
+            <form id="courseCreateForm" class="drive-upload-form">
+              <div class="form-grid">
+                <label class="form-field">
+                  <span class="label">Course name</span>
+                  <input type="text" id="courseNameInput" name="name" placeholder="Intro to Computing" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Course section/code (optional)</span>
+                  <input type="text" id="courseSectionInput" name="section" placeholder="Fall25-BSCS-PnDC" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Description heading (optional)</span>
+                  <input type="text" id="courseDescriptionHeadingInput" name="description_heading" placeholder="Lecture uploads" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Room (optional)</span>
+                  <input type="text" id="courseRoomInput" name="room" placeholder="Lab 203" />
+                </label>
+              </div>
+              <label class="form-field">
+                <span class="label">Description (optional)</span>
+                <input type="text" id="courseDescriptionInput" name="description" placeholder="Auto-created from ZABDESK bridge" />
+              </label>
+              <div class="form-actions">
+                <button class="btn primary" type="submit">Create Classroom course</button>
+                <span id="courseCreateStatus" class="status-hint">Idle.</span>
+              </div>
+            </form>
+
+            <div class="form-actions">
+              <button class="btn primary" id="loadCoursesBtn" type="button">Load Courses</button>
+              <span id="coursesStatus" class="status-hint">Idle.</span>
+            </div>
+
+            <div class="course-list" id="courseList" aria-live="polite"></div>
+
+            <form id="courseworkForm" class="drive-upload-form">
+              <div class="form-grid">
+                <label class="form-field">
+                  <span class="label">Course</span>
+                  <select id="courseSelect" name="course_id">
+                    <option value="">-- Select a course --</option>
+                  </select>
+                </label>
+                <label class="form-field">
+                  <span class="label">Assignment title</span>
+                  <input type="text" id="courseworkTitle" name="title" placeholder="Lecture 3 upload" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Max points (optional)</span>
+                  <input type="number" id="courseworkPoints" name="max_points" min="0" step="1" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Due date (YYYY-MM-DD, optional)</span>
+                  <input type="text" id="courseworkDueDate" name="due_date" placeholder="2026-01-20" />
+                </label>
+                <label class="form-field">
+                  <span class="label">Due time (optional, 12h with AM/PM)</span>
+                  <div class="time-selectors">
+                    <select id="courseworkDueTimeHour" aria-label="Due time hour">
+                      <option value="">HH</option>
+                    </select>
+                    <select id="courseworkDueTimeMinute" aria-label="Due time minute">
+                      <option value="">MM</option>
+                    </select>
+                    <select id="courseworkDueTimePeriod" aria-label="Due time period">
+                      <option value="">--</option>
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
+                </label>
+                <label class="form-field">
+                  <span class="label">Attach Drive file (optional)</span>
+                  <select id="courseworkDriveFile" name="drive_file_id">
+                    <option value="">-- None --</option>
+                  </select>
+                </label>
+                <label class="form-field">
+                  <span class="label">Or upload file (PDF, etc.)</span>
+                  <input type="file" id="courseworkFile" name="file" />
+                </label>
+              </div>
+              <label class="form-field">
+                <span class="label">Description (optional)</span>
+                <input type="text" id="courseworkDescription" name="description" placeholder="Upload lecture PDF and slides." />
+              </label>
+              <div class="form-actions">
+                <button class="btn primary" type="submit">Publish assignment</button>
+                <span id="courseworkStatus" class="status-hint">Idle.</span>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="card" aria-label="Integration checklist">
+          <div class="section-head">
+            <div>
+              <h2>Implementation Checklist</h2>
+              <p class="section-sub">Use this as a hand-off guide when backend endpoints are available.</p>
+            </div>
+          </div>
+          <ol class="checklist">
+            <li>
+              <span class="dot"></span>
+              Connect Google OAuth client (web) and store `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
+            </li>
+            <li>
+              <span class="dot"></span>
+              Map SZABIST courses to Classroom courses and persist the association.
+            </li>
+            <li>
+              <span class="dot"></span>
+              Create Drive folder strategy per course (root + lecture + resources) and expose IDs.
+            </li>
+            <li>
+              <span class="dot"></span>
+              Implement webhook/cron to fetch new grades and surface diffs before commit.
+            </li>
+          </ol>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"><span id="toastText"></span></div>
+  <script src="{% static 'auth/google-services/app.js' %}?v=10"></script>
+</body>
+</html>

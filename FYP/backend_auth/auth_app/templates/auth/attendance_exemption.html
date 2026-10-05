@@ -1,0 +1,706 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Attendance Exemption | Faculty Tasks Automation</title>
+  <meta name="description" content="Process attendance exemptions automatically for students with 7 or more absences." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <style>
+    /* ── Attendance Exemption – scoped styles ── */
+    .exemption-wrap {
+      display: grid;
+      gap: 20px;
+    }
+
+    .exemption-head h2 {
+      margin: 0;
+      font-size: 1.9rem;
+      color: #13293d;
+    }
+
+    .exemption-head p {
+      margin: 8px 0 0;
+      color: #5d748e;
+    }
+
+    .exemption-card {
+      background: #fff;
+      border: 1px solid #e4ebf3;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(16, 32, 48, 0.05);
+      padding: 28px;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #7a93ab;
+      margin: 0 0 14px;
+    }
+
+    /* ── Action buttons row ── */
+    .action-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      align-items: center;
+      background: linear-gradient(135deg, #2686c3, #0f5f90);
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(15, 95, 144, 0.28);
+      color: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      font-size: 0.96rem;
+      font-weight: 700;
+      gap: 10px;
+      padding: 14px 22px;
+      transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+    }
+
+    .action-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(15, 95, 144, 0.36);
+    }
+
+    .action-btn:disabled {
+      cursor: wait;
+      opacity: 0.72;
+      transform: none;
+    }
+
+    .action-btn-secondary {
+      background: linear-gradient(135deg, #3a8f5e, #256b42);
+      box-shadow: 0 10px 24px rgba(37, 107, 66, 0.26);
+    }
+
+    .action-btn-secondary:hover {
+      box-shadow: 0 14px 28px rgba(37, 107, 66, 0.36);
+    }
+
+    .btn-icon {
+      height: 18px;
+      width: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ── Status message ── */
+    .fetch-status {
+      color: #1f4260;
+      font-size: 0.91rem;
+      margin: 12px 0 0;
+      min-height: 20px;
+    }
+
+    .fetch-status.success { color: #155724; }
+    .fetch-status.error   { color: #7b1c24; }
+
+    /* ── Attendance summary table ── */
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid #dde8f3;
+    }
+
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .attendance-table thead th {
+      background: #f0f5fb;
+      color: #2a4a64;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #dde8f3;
+      white-space: nowrap;
+    }
+
+    .attendance-table tbody tr {
+      border-bottom: 1px solid #eef3f9;
+      transition: background 100ms ease;
+    }
+
+    .attendance-table tbody tr:last-child { border-bottom: 0; }
+    .attendance-table tbody tr:hover { background: #f7fbff; }
+
+    .attendance-table td {
+      padding: 11px 16px;
+      color: #1e3a52;
+      vertical-align: middle;
+    }
+
+    .attendance-table td.num {
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* absent highlight */
+    .absent-high {
+      color: #9e2a2f;
+      font-weight: 700;
+    }
+
+    /* ── Exemption status badges ── */
+    .badge-exempt {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-eligible {
+      background: rgba(239, 68, 68, 0.12);
+      color: #a02222;
+    }
+
+    .badge-not-eligible {
+      background: rgba(34, 197, 94, 0.12);
+      color: #166534;
+    }
+
+    .badge-processed {
+      background: rgba(37, 107, 66, 0.14);
+      color: #256b42;
+    }
+
+    /* ── Toast ── */
+    .exemption-toast {
+      background: #103a57;
+      border-radius: 10px;
+      bottom: 18px;
+      box-shadow: 0 12px 24px rgba(9, 34, 53, 0.24);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 600;
+      max-width: 540px;
+      opacity: 0;
+      padding: 10px 14px;
+      pointer-events: none;
+      position: fixed;
+      right: 18px;
+      transform: translateY(10px);
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 1300;
+    }
+
+    .exemption-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .exemption-toast.error { background: #9e2a2f; }
+    .exemption-toast.success { background: #256b42; }
+
+    /* ── Info strip ── */
+    .info-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #eef6ff;
+      border: 1px solid #cde3f7;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.87rem;
+      color: #1a4a68;
+    }
+
+    .info-strip svg { flex-shrink: 0; color: #2686c3; }
+
+    /* ── Stat chips ── */
+    .stats-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .stat-chip {
+      background: #f0f5fb;
+      border: 1px solid #dde8f3;
+      border-radius: 10px;
+      padding: 10px 16px;
+      text-align: center;
+      min-width: 110px;
+    }
+
+    .stat-chip-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f3a57;
+      line-height: 1;
+    }
+
+    .stat-chip-label {
+      font-size: 0.74rem;
+      color: #7a93ab;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .stat-chip.chip-danger .stat-chip-value { color: #a02222; }
+    .stat-chip.chip-success .stat-chip-value { color: #256b42; }
+
+    /* ── Responsive ── */
+    @media (max-width: 740px) {
+      .action-row { flex-direction: column; }
+      .action-btn { width: 100%; justify-content: center; }
+    }
+
+    .dropdown.show { display: block; }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer</a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration</a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item" href="{% url 'auth_app:zabdesk_marks_bridge' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item" href="{% url 'auth_app:midterm_academic_evaluator' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator</a>
+        <a class="nav-item" href="{% url 'auth_app:student_outreach_assistant' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant</a>
+        <a class="nav-item active" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome">Attendance Exemption</div>
+        <div class="topbar-actions">
+          <button class="icon-btn" aria-label="Notifications"><img src="{% static 'auth/icons/bell.svg' %}" alt="" /></button>
+          <button class="icon-btn" aria-label="Settings"><img src="{% static 'auth/icons/settings.svg' %}" alt="" /></button>
+          <form action="{% url 'auth_app:logout' %}" method="get" style="margin:0;">
+            <button class="logout-btn" type="submit" title="Sign out">
+              <span class="logout-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="1.4" fill="none" />
+                  <path d="M13.5 8.5L9.5 12L13.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M10 12H16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>Logout</span>
+            </button>
+          </form>
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn" type="button">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+            <div class="dropdown" id="userMenu">
+              <a href="#">Profile</a>
+              <a href="#">Preferences</a>
+              <a href="{% url 'auth_app:logout' %}">Sign out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ── Page Content ── -->
+      <section class="exemption-wrap" aria-label="Attendance Exemption">
+
+        <!-- Page heading -->
+        <div class="exemption-head">
+          <h2>Attendance Exemption</h2>
+          <p>Retrieve attendance records from ZABDESK, identify students with 7 or more absences, and process exemptions automatically.</p>
+        </div>
+
+        <!-- Info strip -->
+        <div class="info-strip" role="note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>
+            Exemption rule: Students with <strong>Absent Count ≥ 7</strong> are automatically marked <strong>Eligible for Exemption</strong>.
+            The ZABDESK portal is a static demo; attendance data is fetched and parsed from the live portal.
+          </span>
+        </div>
+
+        <!-- Step 1 – Fetch attendance -->
+        <div class="exemption-card">
+          <p class="section-label">Step 1 — Retrieve Attendance Data</p>
+          <div class="action-row">
+            <button id="fetch-attendance-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 .49-3.51"></path>
+              </svg>
+              Fetch Attendance from ZABDESK
+            </button>
+          </div>
+          <p id="fetch-status" class="fetch-status" aria-live="polite"></p>
+        </div>
+
+        <!-- Step 2 – Attendance Summary Table (hidden until data loads) -->
+        <div class="exemption-card" id="summary-section" style="display:none;">
+          <p class="section-label">Step 2 — Attendance Summary</p>
+
+          <!-- Stat chips -->
+          <div class="stats-row" id="stats-row" aria-label="Summary statistics"></div>
+
+          <div class="table-wrapper">
+            <table class="attendance-table" id="attendance-table" aria-label="Student attendance records">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student Name</th>
+                  <th>Student ID</th>
+                  <th>Course</th>
+                  <th>Total Lectures</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                  <th>Leave</th>
+                  <th>Attendance %</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-tbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Step 3 – Process Exemption (hidden until data loads) -->
+        <div class="exemption-card" id="process-section" style="display:none;">
+          <p class="section-label">Step 3 — Process Exemption</p>
+          <div class="action-row">
+            <button id="process-btn" class="action-btn action-btn-secondary" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 0 2-2h11"></path>
+              </svg>
+              Process Attendance Exemption
+            </button>
+          </div>
+          <p id="process-status" class="fetch-status" aria-live="polite"></p>
+        </div>
+
+        <!-- Step 4 – Exemption Results (hidden until processing) -->
+        <div class="exemption-card" id="results-section" style="display:none;">
+          <p class="section-label">Step 4 — Exemption Results</p>
+
+          <!-- Results stat chips -->
+          <div class="stats-row" id="results-stats-row" aria-label="Exemption result statistics"></div>
+
+          <div class="table-wrapper">
+            <table class="attendance-table" id="results-table" aria-label="Exemption processing results">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student Name</th>
+                  <th>Student ID</th>
+                  <th>Course</th>
+                  <th>Absent Count</th>
+                  <th>Exemption Status</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <div id="exemption-toast" class="exemption-toast" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ── DOM refs ── */
+      const userBtn         = document.getElementById('userBtn');
+      const userMenu        = document.getElementById('userMenu');
+      const fetchBtn        = document.getElementById('fetch-attendance-btn');
+      const fetchStatus     = document.getElementById('fetch-status');
+      const summarySection  = document.getElementById('summary-section');
+      const statsRow        = document.getElementById('stats-row');
+      const tbody           = document.getElementById('attendance-tbody');
+      const processSection  = document.getElementById('process-section');
+      const processBtn      = document.getElementById('process-btn');
+      const processStatus   = document.getElementById('process-status');
+      const resultsSection  = document.getElementById('results-section');
+      const resultsStatsRow = document.getElementById('results-stats-row');
+      const resultsTbody    = document.getElementById('results-tbody');
+      const toast           = document.getElementById('exemption-toast');
+
+      /* ── User dropdown ── */
+      if (userBtn && userMenu) {
+        userBtn.addEventListener('click', function () { userMenu.classList.toggle('show'); });
+        document.addEventListener('click', function (e) {
+          if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
+            userMenu.classList.remove('show');
+          }
+        });
+      }
+
+      /* ── Toast ── */
+      function showToast(msg, type) {
+        if (!toast) return;
+        toast.textContent = msg || '';
+        toast.className = 'exemption-toast show' + (type ? ' ' + type : '');
+        window.setTimeout(function () { toast.classList.remove('show'); }, 4000);
+      }
+
+      /* ── Status helper ── */
+      function setStatus(el, msg, type) {
+        if (!el) return;
+        el.textContent = msg;
+        el.className = 'fetch-status' + (type ? ' ' + type : '');
+      }
+
+      /* ── Attendance % colour ── */
+      function pctColor(pct) {
+        if (pct >= 75) return '#256b42';
+        if (pct >= 60) return '#8a5b00';
+        return '#9e2a2f';
+      }
+
+      /* ── Render stat chips ── */
+      function renderStats(container, chips) {
+        container.innerHTML = '';
+        chips.forEach(function (c) {
+          const div = document.createElement('div');
+          div.className = 'stat-chip' + (c.cls ? ' ' + c.cls : '');
+          div.innerHTML = '<div class="stat-chip-value">' + c.value + '</div>'
+                        + '<div class="stat-chip-label">' + c.label + '</div>';
+          container.appendChild(div);
+        });
+      }
+
+      /* ── Render attendance summary table ── */
+      function renderAttendanceTable(students) {
+        tbody.innerHTML = '';
+        students.forEach(function (s, i) {
+          const total  = s.total_lectures || 0;
+          const pres   = s.present || 0;
+          const abs    = s.absent || 0;
+          const leave  = s.leave || 0;
+          const pct    = total > 0 ? Math.round((pres / total) * 100) : 0;
+          const isHigh = abs >= 7;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = [
+            '<td class="num">' + (i + 1) + '</td>',
+            '<td>' + escHtml(s.student_name) + '</td>',
+            '<td>' + escHtml(s.student_id) + '</td>',
+            '<td>' + escHtml(s.course) + '</td>',
+            '<td class="num">' + total + '</td>',
+            '<td class="num">' + pres + '</td>',
+            '<td class="num' + (isHigh ? ' absent-high' : '') + '">' + abs + '</td>',
+            '<td class="num">' + leave + '</td>',
+            '<td class="num" style="color:' + pctColor(pct) + ';font-weight:700;">' + pct + '%</td>',
+          ].join('');
+          tbody.appendChild(tr);
+        });
+      }
+
+      /* ── Render exemption results table ── */
+      function renderResultsTable(results) {
+        resultsTbody.innerHTML = '';
+        results.forEach(function (r, i) {
+          const badge = r.exemption_status === 'Eligible'
+            ? '<span class="badge-exempt badge-eligible">⚠ Eligible</span>'
+            : r.exemption_status === 'Processed'
+              ? '<span class="badge-exempt badge-processed">✓ Processed</span>'
+              : '<span class="badge-exempt badge-not-eligible">✓ Not Eligible</span>';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = [
+            '<td class="num">' + (i + 1) + '</td>',
+            '<td>' + escHtml(r.student_name) + '</td>',
+            '<td>' + escHtml(r.student_id) + '</td>',
+            '<td>' + escHtml(r.course) + '</td>',
+            '<td class="num' + (r.absent >= 7 ? ' absent-high' : '') + '">' + r.absent + '</td>',
+            '<td>' + badge + '</td>',
+          ].join('');
+          resultsTbody.appendChild(tr);
+        });
+      }
+
+      /* ── HTML escape ── */
+      function escHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         State: hold fetched students between steps
+      ───────────────────────────────────────────────────────────── */
+      let _students = [];
+
+      /* ── Step 1: Fetch attendance ── */
+      fetchBtn.addEventListener('click', async function () {
+        const origHtml = fetchBtn.innerHTML;
+        fetchBtn.disabled = true;
+        fetchBtn.innerHTML = '<svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Fetching…';
+        setStatus(fetchStatus, 'Connecting to ZABDESK portal and retrieving attendance data…', '');
+
+        // Hide previous results
+        summarySection.style.display  = 'none';
+        processSection.style.display  = 'none';
+        resultsSection.style.display  = 'none';
+
+        try {
+          const response = await fetch("{% url 'auth_app:attendance_fetch' %}", {
+            method: 'GET',
+            credentials: 'same-origin',
+          });
+
+          const result = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(result.error || result.message || 'Failed to fetch attendance data.');
+          }
+
+          _students = result.students || [];
+
+          if (!_students.length) {
+            setStatus(fetchStatus, 'No attendance records found in the portal.', 'error');
+            showToast('No attendance records returned.', 'error');
+            return;
+          }
+
+          /* render summary */
+          renderAttendanceTable(_students);
+
+          const eligible = _students.filter(function (s) { return s.absent >= 7; }).length;
+          renderStats(statsRow, [
+            { value: _students.length, label: 'Total Students' },
+            { value: eligible, label: 'Eligible (≥7 absent)', cls: eligible > 0 ? 'chip-danger' : '' },
+            { value: _students.length - eligible, label: 'Not Eligible', cls: 'chip-success' },
+          ]);
+
+          summarySection.style.display = 'block';
+          processSection.style.display = 'block';
+          setStatus(fetchStatus, _students.length + ' student record(s) retrieved successfully.', 'success');
+          showToast(_students.length + ' attendance records loaded.', 'success');
+
+        } catch (err) {
+          setStatus(fetchStatus, err.message || 'Fetch failed.', 'error');
+          showToast(err.message || 'Fetch failed.', 'error');
+        } finally {
+          fetchBtn.disabled = false;
+          fetchBtn.innerHTML = origHtml;
+        }
+      });
+
+      /* ── Step 3: Process exemption ── */
+      processBtn.addEventListener('click', async function () {
+        if (!_students.length) {
+          showToast('Fetch attendance data first.', 'error');
+          return;
+        }
+
+        const origHtml = processBtn.innerHTML;
+        processBtn.disabled = true;
+        processBtn.innerHTML = '<svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Processing…';
+        setStatus(processStatus, 'Applying exemption rules…', '');
+        resultsSection.style.display = 'none';
+
+        try {
+          const response = await fetch("{% url 'auth_app:attendance_process_exemption' %}", {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ students: _students }),
+          });
+
+          const result = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(result.error || result.message || 'Exemption processing failed.');
+          }
+
+          const processed = result.results || [];
+          const eligibleCount   = processed.filter(function (r) { return r.exemption_status === 'Eligible'; }).length;
+          const processedCount  = processed.filter(function (r) { return r.exemption_status === 'Processed'; }).length;
+          const notEligCount    = processed.filter(function (r) { return r.exemption_status === 'Not Eligible'; }).length;
+
+          renderResultsTable(processed);
+          renderStats(resultsStatsRow, [
+            { value: processed.length,  label: 'Total Evaluated' },
+            { value: eligibleCount,     label: 'Eligible (≥7 absent)', cls: eligibleCount > 0 ? 'chip-danger' : '' },
+            { value: processedCount,    label: 'Processed', cls: processedCount > 0 ? 'chip-success' : '' },
+            { value: notEligCount,      label: 'Not Eligible' },
+          ]);
+
+          resultsSection.style.display = 'block';
+          var portalMsg = result.portal_updated
+            ? ' Attendance cells changed to Exempt on the ZABDESK portal — check the Chrome browser window to verify.'
+            : (eligibleCount > 0 ? ' Portal update could not be completed.' : '');
+          setStatus(processStatus, 'Exemption processing complete. ' + processed.length + ' records evaluated.' + portalMsg, 'success');
+          showToast(result.portal_updated ? 'Exemption complete — check the Chrome window!' : 'Exemption processing complete.', 'success');
+
+        } catch (err) {
+          setStatus(processStatus, err.message || 'Processing failed.', 'error');
+          showToast(err.message || 'Processing failed.', 'error');
+        } finally {
+          processBtn.disabled = false;
+          processBtn.innerHTML = origHtml;
+        }
+      });
+
+      /* ── CSRF helper ── */
+      function getCookie(name) {
+        let cookieValue = '';
+        if (document.cookie && document.cookie !== '') {
+          document.cookie.split(';').forEach(function (cookie) {
+            const trimmed = cookie.trim();
+            if (trimmed.startsWith(name + '=')) {
+              cookieValue = decodeURIComponent(trimmed.slice(name.length + 1));
+            }
+          });
+        }
+        return cookieValue;
+      }
+
+    })();
+  </script>
+</body>
+
+</html>

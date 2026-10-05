@@ -1,0 +1,335 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Class Progress Tracker - Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <style>
+    /* Scoped styles for tracker card */
+    .tracker-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .tracker-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      text-align: center;
+      transition: transform 0.3s ease;
+      max-width: 450px;
+      width: 100%;
+    }
+
+    .tracker-card h1 {
+      color: #0d3b57;
+      margin-bottom: 30px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .tracker-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      margin: 15px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      text-decoration: none;
+      color: white;
+    }
+
+    .tracker-btn-primary {
+      background-color: #1f6f8b;
+    }
+
+    .tracker-btn-primary:hover {
+      background-color: #0d3b57;
+      transform: scale(1.02);
+    }
+
+    .tracker-btn-success {
+      background-color: #28a745;
+      display: none;
+    }
+
+    .tracker-btn-success:hover {
+      background-color: #218838;
+      transform: scale(1.02);
+    }
+
+    .tracker-btn-secondary {
+      background-color: #3f4d67;
+      color: #fff;
+      display: block;
+    }
+
+    .tracker-btn-secondary:hover {
+      background-color: #2d3a4f;
+      transform: scale(1.02);
+    }
+
+    .status-message {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+      min-height: 20px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .status-success {
+      color: #155724;
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-error {
+      color: #721c24;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1f6f8b;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading .loader {
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}"
+            alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}"
+            alt="" />Curriculum Initializer</a>
+        <a class="nav-item active" href="{% url 'class_progress:tracker' %}"><img
+            src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services
+          Integration</a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic
+          Evaluator</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach
+          Assistant</a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic
+          Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report
+          Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name" id="facultyName">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome" id="welcomeName">Class Progress Tracker</div>
+        <div class="topbar-actions">
+          <button class="icon-btn" aria-label="Notifications"><img src="{% static 'auth/icons/bell.svg' %}"
+              alt="" /></button>
+          <button class="icon-btn" aria-label="Settings"><img src="{% static 'auth/icons/settings.svg' %}"
+              alt="" /></button>
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+            <div class="dropdown" id="userMenu">
+              <a href="#">Profile</a>
+              <a href="#">Preferences</a>
+              <a href="{% url 'auth_app:logout' %}">Sign out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="tracker-container">
+        <div class="tracker-card">
+          <h1>Class Progress Tracker</h1>
+
+          <button id="btnLogin" class="tracker-btn tracker-btn-primary" onclick="loginZabdesk()">
+            <span class="loader"></span>
+            <span class="btn-text">Login to ZABDESK (Faculty)</span>
+          </button>
+
+          <button id="btnExtract" class="tracker-btn tracker-btn-secondary" onclick="extractNoticeboard()">
+            <span class="loader"></span>
+            <span class="btn-text">Extract Class Schedule (Noticeboard)</span>
+          </button>
+
+          <button id="btnAutoFill" class="tracker-btn tracker-btn-success" onclick="autoFillProgress()">
+            <span class="loader"></span>
+            <span class="btn-text">Auto-Fill Today's Class Progress</span>
+          </button>
+
+          <div id="statusMessage" class="status-message"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="{% static 'auth/dashboard.js' %}"></script>
+  <script>
+    // Note: Since we are in the same domain/app, we can use relative paths or explicit URLs provided by Django if needed.
+    // However, existing script used full localhost URL. I'll switch to relative for better integration.
+    const API_BASE_URL = '/class-progress';
+
+    async function loginZabdesk() {
+      setLoading('btnLogin', true);
+      setStatus('Logging in to ZABDESK (Faculty)...', '');
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/login-zabdesk/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.status === 'success') {
+          setStatus('✓ ' + data.message, 'success');
+          document.getElementById('btnLogin').style.display = 'none';
+          document.getElementById('btnAutoFill').style.display = 'block';
+        } else {
+          setStatus(data.message || 'Login failed', 'error');
+        }
+      } catch (error) {
+        setStatus('Network error or server unreachable', 'error');
+        console.error(error);
+      } finally {
+        setLoading('btnLogin', false);
+      }
+    }
+
+    async function extractNoticeboard() {
+      setLoading('btnExtract', true);
+      setStatus('Extracting class schedule from ZABDESK Islamabad Portal (Noticeboard)...', '');
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/extract-noticeboard/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.status === 'success') {
+          const count = data.data ? data.data.extracted_count || 0 : 0;
+          const message = `✓ Class schedule extracted successfully from ZABDESK Islamabad Portal (${count} classes found)`;
+          setStatus(message, 'success');
+          document.getElementById('btnAutoFill').style.display = 'block';
+        } else {
+          setStatus(data.message || 'Extraction failed', 'error');
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus('Network error or server unreachable', 'error');
+      } finally {
+        setLoading('btnExtract', false);
+      }
+    }
+
+    async function autoFillProgress() {
+      setLoading('btnAutoFill', true);
+      setStatus('Auto-filling today\'s class progress on ZABDESK dummy portal...', '');
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/auto-fill/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.status === 'success') {
+          let message = '✓ ' + data.message;
+          if (data.data && data.data.topic) {
+            message += ` (Topic: ${data.data.topic})`;
+          }
+          setStatus(message, 'success');
+        } else {
+          setStatus(data.message || 'Auto-fill failed', 'error');
+        }
+      } catch (error) {
+        setStatus('Network error or server unreachable', 'error');
+        console.error(error);
+      } finally {
+        setLoading('btnAutoFill', false);
+      }
+    }
+
+    function setStatus(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.className = 'status-message'; // reset
+      if (type === 'success') {
+        statusEl.classList.add('status-success');
+      } else if (type === 'error') {
+        statusEl.classList.add('status-error');
+      }
+    }
+
+    function setLoading(btnId, isLoading) {
+      const btn = document.getElementById(btnId);
+      if (isLoading) {
+        btn.classList.add('loading');
+        btn.disabled = true;
+      } else {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+
+</html>

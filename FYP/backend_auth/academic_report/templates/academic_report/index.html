@@ -1,0 +1,210 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Academic Report Generator | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <link rel="stylesheet" href="{% static 'academic_report/style.css' %}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" />
+      </div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard
+        </a>
+        <a class="nav-item" href="#">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer
+        </a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker
+        </a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:zabdesk_marks_bridge' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:midterm_academic_evaluator' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:student_outreach_assistant' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption
+        </a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights
+        </a>
+        <a class="nav-item active" href="{% url 'academic_report:index' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name" id="facultyName">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome">Academic Report Generator</div>
+        <div class="topbar-actions">
+          <span class="badge-inline">Reports</span>
+          <div class="user-dropdown">
+            <button class="user-btn">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Upload Section -->
+      <section class="control-grid">
+        <!-- Excel Upload Card -->
+        <div class="card-panel">
+          <h3>Upload Assessment Data</h3>
+          <p>Provide an Excel file (.xlsx) containing student grade letters. The file should include columns for Quizzes (1-4), Assignments (1-4), Mid Term Questions (Q1-Q4), and Final Term Questions (Q1-Q4). Cells should contain grade letters (A+, A, A-, B+, B, B-, C+, C, C-, F).</p>
+
+          <form id="uploadExcelForm">
+            <!-- Course Info Fields -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="courseCode">Course Code</label>
+                <input type="text" id="courseCode" name="course_code" class="text-input" placeholder="e.g. CSC 1108" />
+              </div>
+              <div class="form-group">
+                <label for="courseName">Course Name</label>
+                <input type="text" id="courseName" name="course_name" class="text-input" placeholder="e.g. Introduction to Computer Science" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="instructor">Instructor</label>
+                <input type="text" id="instructor" name="course_instructor" class="text-input" placeholder="Faculty name" />
+              </div>
+              <div class="form-group">
+                <label for="semester">Semester</label>
+                <input type="text" id="semester" name="semester" class="text-input" placeholder="e.g. Spring 2026" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sections">Sections</label>
+                <input type="text" id="sections" name="sections" class="text-input" placeholder="e.g. BS(SE)-1A" />
+              </div>
+              <div class="form-group">
+                <label for="totalCredits">Total Credits</label>
+                <input type="text" id="totalCredits" name="total_credits" class="text-input" placeholder="e.g. 3 (2,1)" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="academicTerm">Academic Term</label>
+                <input type="text" id="academicTerm" name="academic_term" class="text-input" placeholder="e.g. Fall 2024" />
+              </div>
+              <div class="form-group">
+                <label for="catalogDesc">Catalog Description</label>
+                <textarea id="catalogDesc" name="catalog_description" class="text-input" rows="2" placeholder="Course catalog description..."></textarea>
+              </div>
+            </div>
+
+            <div class="file-upload-wrapper">
+              <input type="file" name="file" id="excelFile" accept=".xlsx,.xlsm,.xlsb,.xltx,.xltm,.xls" class="file-input" />
+              <label for="excelFile" class="file-label">
+                <span class="file-label-text">Select Excel file...</span>
+              </label>
+            </div>
+            <button class="btn btn-primary" type="submit" id="btnUpload">Upload &amp; Generate Report</button>
+          </form>
+          <div id="uploadStatus" class="status-msg"></div>
+        </div>
+
+        <!-- Quick Info Card -->
+        <div class="card-panel flex-column justify-between">
+          <div>
+            <h3>How It Works</h3>
+            <p>The system reads your Excel file containing grade letters per assessment and calculates:</p>
+            <ul class="info-list">
+              <li><strong>Grade Distribution:</strong> Counts of A+, A, A-, B+, B, B-, C+, C, C- per assessment</li>
+              <li><strong>OBE_EEMU:</strong> 4-level OBE vector (Excellent, Effective, Minimal, Unsatisfactory)</li>
+              <li><strong>CLO Averages:</strong> GPA-weighted averages per Course Learning Outcome</li>
+              <li><strong>EPAN:</strong> Overall average across all CLOs</li>
+            </ul>
+            <p>The report generates Program Outcomes mapping, Head Wise Grade tables, and OBE_EEMU measurements.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Result Summary (hidden until upload) -->
+      <section class="stats-grid" id="statsGrid" style="display: none;">
+        <div class="stat-card">
+          <span class="stat-title">Total Students</span>
+          <span class="stat-value" id="valTotalStudents">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-title">EPAN Average</span>
+          <span class="stat-value" id="valEpan">0.00</span>
+        </div>
+        <div class="stat-card" id="achievementCard">
+          <span class="stat-title">Achievement Level</span>
+          <span class="stat-value" id="valAchievement">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-title">CLO1 Avg</span>
+          <span class="stat-value" id="valClo1">0.00</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-title">CLO2 Avg</span>
+          <span class="stat-value" id="valClo2">0.00</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-title">CLO3 Avg</span>
+          <span class="stat-value" id="valClo3">0.00</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-title">CLO4 Avg</span>
+          <span class="stat-value" id="valClo4">0.00</span>
+        </div>
+      </section>
+
+      <!-- View Report Button (hidden until upload) -->
+      <div id="viewReportArea" style="display: none; margin-top: 20px; text-align: center;">
+        <a id="btnViewReport" href="#" class="btn btn-primary" style="text-decoration: none; font-size: 1rem; padding: 14px 32px;">
+          View Full Report
+        </a>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    window.CSRF_TOKEN = '{{ csrf_token }}';
+  </script>
+  <script src="{% static 'academic_report/script.js' %}"></script>
+</body>
+
+</html>

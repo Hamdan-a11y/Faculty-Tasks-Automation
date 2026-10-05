@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SZABIST Faculty Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/auth.css' %}" />
+</head>
+<body>
+  <header class="top-banner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">SZ</div>
+      <div class="brand-text">
+        <div class="brand-title">Shaheed Zulfikar Ali Bhutto Institute of Science and Technology</div>
+      </div>
+    </div>
+    <div class="campus">Islamabad Campus</div>
+  </header>
+
+  <main class="auth-page">
+    <section class="hero">
+      <div class="hero-icon" aria-hidden="true">🖐️</div>
+      <h1 class="title">Faculty Tasks Automation</h1>
+      <p class="subtitle">Sign in with your official SZABIST faculty account to continue.</p>
+      <button class="google-btn" id="googleSignInBtn">
+        <img src="{% static 'auth/icons/google.svg' %}" alt="Google" class="google-icon" />
+        <span>Sign In With Google</span>
+      </button>
+    </section>
+  </main>
+
+  <footer class="footer-banner">© 2025 Hamdan, Fawad &amp; Adnan. All rights reserved.</footer>
+
+  <script src="{% static 'auth/auth.js' %}"></script>
+</body>
+</html>

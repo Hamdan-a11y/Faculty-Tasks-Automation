@@ -1,0 +1,256 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assignment Alerts | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/auto-reminder/styles.css' %}?v=14" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer</a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration</a>
+        <a class="nav-item active" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item" href="{% url 'auth_app:zabdesk_marks_bridge' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item" href="{% url 'auth_app:midterm_academic_evaluator' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator</a>
+        <a class="nav-item" href="{% url 'auth_app:student_outreach_assistant' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant</a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name" id="facultyName">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <p class="eyebrow">Auto Reminder</p>
+          <h1>Alerts</h1>
+          <p class="subtitle">Assignments, entry deadlines, quizzes, and mid-term events.</p>
+        </div>
+        <div class="topbar-actions">
+          <label class="toggle">
+            <input id="enableToggle" type="checkbox" />
+            <span class="slider"></span>
+            <span class="toggle-label">Enable Alerts</span>
+          </label>
+          <button class="icon-btn" aria-label="Notifications"><img src="{% static 'auth/icons/bell.svg' %}" alt="" /></button>
+          <button class="icon-btn" aria-label="Settings"><img src="{% static 'auth/icons/settings.svg' %}" alt="" /></button>
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+            <div class="dropdown" id="userMenu">
+              <a href="#">Profile</a>
+              <a href="#">Preferences</a>
+              <a href="{% url 'auth_app:logout' %}">Sign out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="table-head">
+          <div>
+            <h2>Alerts</h2>
+            <p class="muted">New assignments and proximity reminders.</p>
+          </div>
+          <div class="actions">
+            <button id="refreshBtn" class="btn" type="button">
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <span class="btn-label">Refresh</span>
+            </button>
+            <button id="runNowBtn" class="btn btn-secondary" type="button">
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <span class="btn-label">Run alerts now</span>
+            </button>
+            <button id="createEventsBtn" class="btn btn-secondary" type="button">
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <span class="btn-label">Create Calendar Events</span>
+            </button>
+            <button id="deleteEventsBtn" class="btn btn-secondary" type="button">
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <span class="btn-label">Delete Calendar Events</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="create-panel">
+          <div class="create-fields">
+            <div class="field">
+              <label for="createTitle">Title</label>
+              <input id="createTitle" type="text" placeholder="e.g., Midterm marks due" />
+            </div>
+            <div class="field">
+              <label for="createDue">Due / Event Date</label>
+              <input id="createDue" type="date" />
+            </div>
+            <div class="field">
+              <label for="createType">Type</label>
+              <select id="createType">
+                <option value="mid_term_event">Event</option>
+                <option value="deadline">Deadline</option>
+                <option value="entry_deadline">Assignment Entry</option>
+                <option value="quiz_entry_deadline">Quiz Entry</option>
+              </select>
+            </div>
+          </div>
+          <button id="createBtn" class="btn" type="button">Add alert</button>
+        </div>
+
+        <div class="table" role="table" aria-label="Auto reminder alerts">
+          <div class="table-row table-row--head" role="row">
+            <div role="columnheader">Item</div>
+            <div role="columnheader">Due / Event Date</div>
+            <div role="columnheader">Submitted / Total</div>
+            <div role="columnheader">Pending</div>
+            <div role="columnheader">Alert Type</div>
+            <div role="columnheader">Status</div>
+            <div role="columnheader">Completed</div>
+            <div role="columnheader">Actions</div>
+          </div>
+          <div id="tableBody"></div>
+        </div>
+
+        <div class="table-head table-head--sub" style="margin-top: 18px;">
+          <div>
+            <h3>Academic Deadlines Overview</h3>
+            <p class="muted">Static overview of the setup deadlines (read-only).</p>
+          </div>
+        </div>
+
+        <div class="table" role="table" aria-label="Academic deadlines overview">
+          <div class="table-row table-row--head" role="row">
+            <div role="columnheader">Week No.</div>
+            <div role="columnheader">Progress Description</div>
+            <div role="columnheader">Deadlines</div>
+          </div>
+
+          <div class="table-row" role="row">
+            <div>Week 0</div>
+            <div>Course Outline</div>
+            <div>12th Sep 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 3</div>
+            <div>Quiz 1 Entries</div>
+            <div>3rd Oct 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 4</div>
+            <div>Assignment 1 Entries</div>
+            <div>10th Oct 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 6</div>
+            <div>Mid Exam Department Submission</div>
+            <div>22nd Oct 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div></div>
+            <div>Quiz 2 Entries</div>
+            <div>24th Oct 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 7</div>
+            <div>Assignment 2 Entries</div>
+            <div>31st Oct 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 8</div>
+            <div>Mid Term Exams</div>
+            <div>3rd - 9th Nov 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 9</div>
+            <div>Mid FYP Presentations II</div>
+            <div>18th Nov 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div></div>
+            <div>Mid FYP Presentations I</div>
+            <div>20th Nov 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 10</div>
+            <div>Mid Term Entries</div>
+            <div>24th Nov 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 11</div>
+            <div>Quiz 3 Entries</div>
+            <div>5th Dec 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 12</div>
+            <div>Assignment 3 Entries</div>
+            <div>12th Dec 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 13</div>
+            <div>Final Exam Submission to HoD</div>
+            <div>12th Dec 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 14</div>
+            <div>Quiz 4 Entries</div>
+            <div>26th Dec 2025</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 15</div>
+            <div>Assignment 4 Entries</div>
+            <div>2nd Jan 2026</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 16</div>
+            <div>Final Exam</div>
+            <div>5th - 18th Jan 2026</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 18</div>
+            <div>Final Exam Result submission to Department</div>
+            <div>20th Jan 2026</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 19</div>
+            <div>Final Exam Entries &amp; Recap Sheet Sign.</div>
+            <div>26th Jan 2026</div>
+          </div>
+          <div class="table-row" role="row">
+            <div>Week 20</div>
+            <div>FCAR and Course Folders</div>
+            <div>6th Feb 2026</div>
+          </div>
+        </div>
+
+        <div id="emptyState" class="empty" hidden>
+          <p>No alerts yet. Create a Classroom assignment or wait for scheduled quiz and mid-term reminders.</p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    window.CSRF_TOKEN = '{{ csrf_token }}';
+  </script>
+  <script src="{% static 'auth/auto-reminder/app.js' %}?v=24"></script>
+</body>
+</html>

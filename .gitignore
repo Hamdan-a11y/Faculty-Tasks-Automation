@@ -1,0 +1,114 @@
+# ==============================================================================
+# Git Ignore Configuration for Faculty Tasks Automation
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environments & Secrets
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+.envrc
+
+# Google OAuth Credentials, Client Secrets, and Service Accounts
+client_secret*.json
+*client_secret*.json
+credentials*.json
+token*.json
+*.pickle
+service-account*.json
+service_account*.json
+*.pem
+*.key
+*.p12
+
+# ------------------------------------------------------------------------------
+# 2. Python & Bytecode
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ------------------------------------------------------------------------------
+# 3. Django, Databases & Static/Media
+# ------------------------------------------------------------------------------
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+*.db
+*.db-journal
+local_settings.py
+staticfiles/
+media/
+postgres_data/
+
+# ------------------------------------------------------------------------------
+# 4. Logs, Debug & Output
+# ------------------------------------------------------------------------------
+logs/
+*.log
+debug.log
+testlog.txt
+npm-debug.log*
+
+# Uploaded / Generated files
+exports/
+screenshots/
+output/
+reports/
+
+# ------------------------------------------------------------------------------
+# 5. Browser Automation & Profiles
+# ------------------------------------------------------------------------------
+chrome_automation_profile/
+selenium_profile/
+chromedriver.exe
+geckodriver.exe
+
+# ------------------------------------------------------------------------------
+# 6. Node Dependencies (if any frontend tooling added)
+# ------------------------------------------------------------------------------
+node_modules/
+
+# ------------------------------------------------------------------------------
+# 7. IDEs & OS Metadata
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.code-workspace
+.DS_Store
+Thumbs.db
+desktop.ini

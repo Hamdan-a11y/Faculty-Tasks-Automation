@@ -1,0 +1,261 @@
+{% load static %}{% load report_tags %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Academic Report - {{ run.course_code|default:"Course" }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #1f2d3d;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 30px;
+    }
+    .report-main-title { font-size: 16px; font-weight: 700; color: #0d3b57; text-align: left; margin-bottom: 4px; }
+    .po-header-label { font-size: 11px; color: #64748b; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11px; }
+    th { background: #f1f5f9; color: #475569; font-weight: 600; padding: 6px 8px; text-align: center; border: 1px solid #cbd5e1; }
+    td { padding: 5px 8px; border: 1px solid #cbd5e1; text-align: center; }
+    td:first-child { text-align: left; }
+    .po-col { width: 30px; }
+    .po-desc { text-align: left !important; }
+    .po-task-num { width: 30px; text-align: center !important; }
+    .po-metric-row td { font-weight: 600; background: #f8fafc; }
+    .po-metric-label { text-align: right !important; }
+    .info-table { margin: 8px 0; }
+    .info-row { display: flex; padding: 4px 0; border-bottom: 1px dotted #e2e8f0; }
+    .info-label { font-weight: 600; color: #475569; min-width: 140px; }
+    .info-value { color: #1f2d3d; }
+    .info-row-full { padding: 4px 0; border-bottom: 1px dotted #e2e8f0; }
+    .desc-text { font-style: italic; color: #475569; display: block; margin-top: 4px; }
+    .section-title { font-size: 13px; font-weight: 700; color: #0d3b57; margin: 16px 0 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+    .note-text { font-size: 10px; color: #64748b; font-style: italic; margin-top: 4px; }
+    .mod-text { color: #475569; padding: 4px 0; }
+    .outcome-block { margin-bottom: 14px; }
+    .outcome-heading { font-size: 12px; font-weight: 700; color: #0d3b57; margin: 8px 0 4px; }
+    .avg-row td { background: #f8fafc; font-weight: 600; }
+    .narrative-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px; margin: 6px 0; }
+    .narrative-box p { color: #475569; font-size: 11px; }
+    .po-list { margin: 8px 0; }
+    .po-list-item { display: flex; padding: 3px 0; font-size: 11px; color: #475569; }
+    .po-list-letter { font-weight: 700; color: #0d3b57; min-width: 24px; }
+    .po-list-desc { flex: 1; }
+    @media print {
+      body { padding: 15px; }
+      .report-section { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Title -->
+  <h1 class="report-main-title">{{ run.course_name|default:"Course" }} {{ run.sections|default:"" }}</h1>
+  <div style="text-align: right; margin-bottom: 10px;">
+    <span class="po-header-label">Program Outcomes</span>
+  </div>
+
+  <!-- Section 1: Program Outcomes Table -->
+  <div class="report-section">
+    <table>
+      <thead>
+        <tr>
+          <th></th><th></th>
+          {% for letter, _ in program_outcomes %}<th class="po-col">{{ letter }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for clo_name in clo_labels %}
+        {% with po_info=po_mapping|get_item:clo_name %}
+        {% if po_info %}
+        <tr>
+          <td class="po-task-num">{{ forloop.counter }}</td>
+          <td class="po-desc">{{ po_info.description }}</td>
+          {% for letter, _ in program_outcomes %}
+          <td class="po-col">{% if letter in po_info.marks %}X{% endif %}</td>
+          {% endfor %}
+        </tr>
+        {% endif %}
+        {% endwith %}
+        {% endfor %}
+        <tr class="po-metric-row">
+          <td colspan="2" class="po-metric-label">Metric Goal</td>
+          {% for letter, _ in program_outcomes %}
+          <td class="po-col">{% if letter == "c" or letter == "d" %}2.0{% endif %}</td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 2: Course Information -->
+  <div class="report-section">
+    <div class="info-table">
+      <div class="info-row"><span class="info-label">Course Code:</span><span class="info-value">{{ run.course_code|default:"N/A" }}</span></div>
+      <div class="info-row"><span class="info-label">Sections:</span><span class="info-value">{{ run.sections|default:"N/A" }}</span></div>
+      <div class="info-row"><span class="info-label">Total Credits:</span><span class="info-value">{{ run.total_credits|default:"N/A" }}</span></div>
+      <div class="info-row"><span class="info-label">Professor:</span><span class="info-value">{{ run.course_instructor|default:"N/A" }}</span></div>
+      <div class="info-row"><span class="info-label">Course Title:</span><span class="info-value">{{ run.course_name|default:"N/A" }}</span></div>
+      <div class="info-row"><span class="info-label">Academic Term:</span><span class="info-value">{{ run.academic_term|default:run.semester|default:"N/A" }}</span></div>
+      {% if run.catalog_description %}
+      <div class="info-row-full"><span class="info-label">Catalog Description:</span><span class="info-value desc-text">{{ run.catalog_description }}</span></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Section 3: Grade Distribution -->
+  <div class="report-section">
+    <div class="section-title">Grade Distribution:</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Subject Grades</th>
+          <th>A+</th><th>A</th><th>A-</th><th>B+</th><th>B</th><th>B-</th><th>C+</th><th>C</th><th>C-</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Total ({{ run.total_students }})</strong></td>
+          <td>{{ run.grade_distribution|get_item:"A+"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"A"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"A-"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"B+"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"B"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"B-"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"C+"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"C"|default:"0" }}</td>
+          <td>{{ run.grade_distribution|get_item:"C-"|default:"0" }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note-text">*F Grades are excluded for calculating EPAN and EEMM.</p>
+  </div>
+
+  <!-- Section 4: Modifications Made -->
+  <div class="report-section">
+    <div class="section-title">Modifications Made to Course:</div>
+    <p class="mod-text">{{ run.modifications_made|default:"None" }}</p>
+  </div>
+
+  <!-- Section 5: Course Outcomes with Measurement Data -->
+  <div class="report-section">
+    <div class="section-title">Course Outcomes | Measurement (EEMU vector), Average</div>
+    {% for clo_name in clo_labels %}
+    {% with detail=clo_detail|get_item:clo_name %}
+    {% if detail %}
+    <div class="outcome-block">
+      <div class="outcome-heading">Outcome #{{ forloop.counter }}</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Head Wise Grades</th>
+            <th>A+</th><th>A</th><th>A-</th><th>B+</th><th>B</th><th>B-</th><th>C+</th><th>C</th><th>C-</th>
+            <th>OBE EEMU</th><th>Ave.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for assess in detail.assessments %}
+          <tr>
+            <td>{{ assess.label }}</td>
+            <td>{{ assess.grade_counts|get_item:"A+"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"A"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"A-"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"B+"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"B"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"B-"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"C+"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"C"|default:"0" }}</td>
+            <td>{{ assess.grade_counts|get_item:"C-"|default:"0" }}</td>
+            <td>{{ assess.eemu.0 }},{{ assess.eemu.1 }},{{ assess.eemu.2 }},{{ assess.eemu.3 }}</td>
+            <td>{{ assess.average|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="avg-row">
+            <td><strong>Average:</strong></td>
+            <td colspan="10"></td>
+            <td><strong>{{ detail.average|floatformat:2 }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endfor %}
+  </div>
+
+  <!-- Section 6: Program Outcome Assessment -->
+  <div class="report-section">
+    <div class="section-title">Program Outcome Assessment</div>
+    <div class="narrative-box">
+      <p>
+        Assessing the student performance using Cohort Longitudinal Analysis, or CLA,
+        the corresponding EPAN Average for outcome 1, 2, 3 has
+        ({{ run.clo1_avg|floatformat:2 }}, {{ run.clo2_avg|floatformat:2 }}, {{ run.clo3_avg|floatformat:2 }})
+        which means the students demonstrated and learnt the outcomes 1, 2, and 3,
+        and performed {{ run.achievement_level|upper }}.
+        More efforts are required to achieve a better level.
+        I am planning to improve the course based on student's feedback and
+        hopefully better level will be achieved in the next semester.
+      </p>
+    </div>
+  </div>
+
+  <!-- Section 7: Program (Metric Goal) -->
+  <div class="report-section">
+    <div class="section-title">BS({{ program_abbr }}) Program (Metric Goal)</div>
+    <table style="max-width: 350px;">
+      <thead>
+        <tr><th></th><th>c</th><th>d</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>EPAN Average</td><td>{{ run.epan_avg|floatformat:2 }}</td><td>{{ run.epan_avg|floatformat:2 }}</td></tr>
+        <tr><td>Apprentice Average</td><td>2.00</td><td>2.00</td></tr>
+        <tr><td>Program Goal</td><td>2.00</td><td>2.00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 8: Student Feedback -->
+  <div class="report-section">
+    <div class="section-title">Student Feedback</div>
+    <div class="narrative-box">
+      <p>{{ run.student_feedback|default:"Students appreciated for providing them with a different perspective and helping them understand the complexities in the start of the program. They found the course structure to be effective, as it combined theory with practical problems and comprehensive solutions." }}</p>
+    </div>
+  </div>
+
+  <!-- Section 9: Reflection -->
+  <div class="report-section">
+    <div class="section-title">Reflection</div>
+    <div class="narrative-box">
+      <p>{{ run.reflection|default:"While the course was generally well-received by students, it became evident that there were moments when they struggled to fully grasp the connection between theoretical concepts and their practical implementation. In light of this, the teacher has realized the importance of dedicating specific classes solely to implementation and python coding as well application software." }}</p>
+    </div>
+  </div>
+
+  <!-- Section 10: Proposed Actions -->
+  <div class="report-section">
+    <div class="section-title">Proposed Actions for Course Improvement</div>
+    <div class="narrative-box">
+      <p>{{ run.proposed_improvements|default:"Plan to organize dedicated classes to provide python coding and application software guidance." }}</p>
+    </div>
+  </div>
+
+  <!-- Section 11: Program Outcomes List -->
+  <div class="report-section">
+    <div class="section-title">BS({{ program_full }}) Program Outcomes</div>
+    <div class="po-list">
+      {% for letter, desc in program_outcomes %}
+      <div class="po-list-item">
+        <span class="po-list-letter">{{ letter }}.</span>
+        <span class="po-list-desc">{{ desc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</body>
+</html>

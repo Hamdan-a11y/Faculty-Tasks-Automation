@@ -1,0 +1,840 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Midterm Academic Evaluator | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <style>
+    .midterm-wrap {
+      display: grid;
+      gap: 16px;
+    }
+
+    .midterm-head h2 {
+      margin: 0;
+      font-size: 1.9rem;
+      color: #13293d;
+    }
+
+    .midterm-head p {
+      margin: 8px 0 0;
+      color: #5d748e;
+    }
+
+    .module-card {
+      background: #fff;
+      border: 1px solid #e4ebf3;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(16, 32, 48, 0.05);
+      padding: 24px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .action-btn {
+      align-items: center;
+      background: linear-gradient(135deg, #2686c3, #0f5f90);
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(15, 95, 144, 0.28);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      font-size: 0.96rem;
+      font-weight: 700;
+      gap: 10px;
+      justify-content: center;
+      min-height: 120px;
+      padding: 14px;
+      text-align: center;
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+
+    .action-btn:hover {
+      filter: brightness(1.03);
+      transform: translateY(-2px);
+    }
+
+    .action-btn:disabled {
+      cursor: wait;
+      opacity: 0.72;
+      transform: none;
+    }
+
+    .btn-icon {
+      width: 30px;
+      height: 30px;
+    }
+
+    .status-text {
+      color: #1f4260;
+      font-size: 0.93rem;
+      min-height: 20px;
+      margin: 12px 0 0;
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      margin-top: 16px;
+    }
+
+    .summary-item {
+      background: #f7fbff;
+      border: 1px solid #d6e4ef;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .summary-label {
+      color: #4e6a83;
+      font-size: 0.8rem;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-weight: 700;
+    }
+
+    .summary-value {
+      color: #14364f;
+      margin: 6px 0 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .section-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 2fr 1fr;
+    }
+
+    .table-card {
+      background: #fff;
+      border: 1px solid #e4ebf3;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(16, 32, 48, 0.05);
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .table-card table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 860px;
+    }
+
+    .table-card th,
+    .table-card td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #ecf2f8;
+      text-align: left;
+      color: #13334d;
+    }
+
+    .table-card thead {
+      background: #dff3fb;
+      color: #0d3b57;
+    }
+
+    .table-card tbody tr:nth-child(odd) {
+      background: #f9fcff;
+    }
+
+    .risk-critical {
+      background: #fde9e8 !important;
+    }
+
+    .pill {
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      line-height: 1;
+      padding: 7px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .pill-pass {
+      background: #e8f8ef;
+      color: #1f8b4d;
+    }
+
+    .pill-fail {
+      background: #ffe7e5;
+      color: #b3261e;
+    }
+
+    .pill-critical {
+      background: #ffdedd;
+      color: #9e2a2f;
+    }
+
+    .dist-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 10px;
+    }
+
+    .dist-table th,
+    .dist-table td {
+      border-bottom: 1px solid #ecf2f8;
+      color: #183a54;
+      padding: 8px 6px;
+      text-align: left;
+    }
+
+    .dist-table thead {
+      background: #dff3fb;
+      color: #0d3b57;
+    }
+
+    .empty-row {
+      color: #6c8093;
+      text-align: center;
+      padding: 14px;
+    }
+
+    .modal-backdrop {
+      align-items: center;
+      background: rgba(10, 28, 44, 0.42);
+      display: none;
+      inset: 0;
+      justify-content: center;
+      padding: 18px;
+      position: fixed;
+      z-index: 1200;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #fff;
+      border: 1px solid #dce8f2;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(12, 43, 66, 0.24);
+      max-width: 700px;
+      padding: 22px;
+      width: 100%;
+    }
+
+    .modal-card h3 {
+      color: #13293d;
+      font-size: 1.16rem;
+      margin: 0 0 10px;
+    }
+
+    .modal-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #1b4462;
+      line-height: 1.6;
+      font-size: 0.92rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
+    .modal-btn {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 700;
+      min-width: 110px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #2686c3, #0f5f90);
+      color: #fff;
+    }
+
+    .bridge-toast {
+      background: #103a57;
+      border-radius: 10px;
+      bottom: 18px;
+      box-shadow: 0 12px 24px rgba(9, 34, 53, 0.24);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 600;
+      max-width: 540px;
+      opacity: 0;
+      padding: 10px 14px;
+      pointer-events: none;
+      position: fixed;
+      right: 18px;
+      transform: translateY(10px);
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 1300;
+    }
+
+    .bridge-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bridge-toast.error {
+      background: #9e2a2f;
+    }
+
+    .dropdown.show {
+      display: block;
+    }
+
+    @media (max-width: 1240px) {
+      .action-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
+      .section-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 740px) {
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bridge-toast {
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer</a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration</a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item" href="{% url 'auth_app:zabdesk_marks_bridge' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item active" href="{% url 'auth_app:midterm_academic_evaluator' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator</a>
+        <a class="nav-item" href="{% url 'auth_app:student_outreach_assistant' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant</a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome">Welcome, {{ user_name|default:"Faculty" }}</div>
+        <div class="topbar-actions">
+          <button class="icon-btn" aria-label="Notifications"><img src="{% static 'auth/icons/bell.svg' %}" alt="" /></button>
+          <button class="icon-btn" aria-label="Settings"><img src="{% static 'auth/icons/settings.svg' %}" alt="" /></button>
+          <form action="{% url 'auth_app:logout' %}" method="get" style="margin:0;">
+            <button class="logout-btn" type="submit" title="Sign out">
+              <span class="logout-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="1.4" fill="none" />
+                  <path d="M13.5 8.5L9.5 12L13.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M10 12H16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>Logout</span>
+            </button>
+          </form>
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn" type="button">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+            <div class="dropdown" id="userMenu">
+              <a href="#">Profile</a>
+              <a href="#">Preferences</a>
+              <a href="{% url 'auth_app:logout' %}">Sign out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="midterm-wrap" aria-label="Midterm evaluation module">
+        <div class="midterm-head">
+          <h2>Midterm Academic Evaluator</h2>
+          <p>Upload a midterm sheet, extract records, automatically evaluate risk and performance, and generate a report.</p>
+        </div>
+
+        <div class="module-card">
+          <div class="action-grid">
+            <button id="upload-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Upload Midterm Excel Sheet
+            </button>
+
+            <button id="extract-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Extract Midterm Data
+            </button>
+
+            <button id="evaluate-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"></path>
+                <path d="M7 14l3-3 3 2 4-5"></path>
+              </svg>
+              Recalculate Evaluation
+            </button>
+
+            <button id="report-btn" class="action-btn" type="button">
+              <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="12" y1="18" x2="12" y2="12"></line>
+                <polyline points="9 15 12 12 15 15"></polyline>
+              </svg>
+              Generate Evaluation Report
+            </button>
+          </div>
+
+          <input id="midterm-file-input" type="file" accept=".xlsx" style="display:none;" />
+          <p id="upload-status" class="status-text" aria-live="polite"></p>
+          <p id="evaluate-status" class="status-text" aria-live="polite"></p>
+
+          <div id="summary-grid" class="summary-grid" style="display:none;">
+            <div class="summary-item">
+              <p class="summary-label">Highest</p>
+              <p class="summary-value" id="highest-value">-</p>
+            </div>
+            <div class="summary-item">
+              <p class="summary-label">Lowest</p>
+              <p class="summary-value" id="lowest-value">-</p>
+            </div>
+            <div class="summary-item">
+              <p class="summary-label">Average / Median</p>
+              <p class="summary-value" id="avg-median-value">-</p>
+            </div>
+            <div class="summary-item">
+              <p class="summary-label">Pass / Fail</p>
+              <p class="summary-value" id="pass-fail-value">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-grid">
+          <div class="table-card">
+            <div class="section-title">Extracted Student Preview</div>
+            <table id="students-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Registration No</th>
+                  <th>Student Name</th>
+                  <th>Midterm Marks</th>
+                  <th>Grade</th>
+                  <th>GPA</th>
+                  <th>Performance Band</th>
+                  <th>Risk Status</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody">
+                <tr>
+                  <td class="empty-row" colspan="9">Upload and extract a midterm sheet to see student records.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-card">
+            <div class="section-title">Grade Distribution</div>
+            <table class="dist-table">
+              <thead>
+                <tr>
+                  <th>Grade</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody id="grade-dist-body"></tbody>
+            </table>
+            <div class="section-title" style="margin-top: 18px;">Performance Bands</div>
+            <table class="dist-table">
+              <thead>
+                <tr>
+                  <th>Band</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody id="band-dist-body"></tbody>
+            </table>
+            <div style="margin-top: 14px;">
+              <button id="view-summary-btn" type="button" class="refresh-btn">View Summary Notes</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="summary-modal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="summary-modal-title">
+    <div class="modal-card">
+      <h3 id="summary-modal-title">Evaluation Summary Notes</h3>
+      <ol id="summary-note-list" class="modal-list">
+        <li>Extract midterm data to generate automated insights.</li>
+        <li>Critical students scoring below 10 are highlighted in red.</li>
+        <li>Generate report to download Summary, Student Detail, and Risk sheets.</li>
+      </ol>
+      <div class="modal-actions">
+        <button id="close-summary-modal" class="modal-btn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bridge-toast" class="bridge-toast" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      const userBtn = document.getElementById('userBtn');
+      const userMenu = document.getElementById('userMenu');
+      if (userBtn && userMenu) {
+        userBtn.addEventListener('click', function () {
+          userMenu.classList.toggle('show');
+        });
+        document.addEventListener('click', function (event) {
+          if (!userBtn.contains(event.target) && !userMenu.contains(event.target)) {
+            userMenu.classList.remove('show');
+          }
+        });
+      }
+
+      const uploadBtn = document.getElementById('upload-btn');
+      const extractBtn = document.getElementById('extract-btn');
+      const evaluateBtn = document.getElementById('evaluate-btn');
+      const reportBtn = document.getElementById('report-btn');
+      const fileInput = document.getElementById('midterm-file-input');
+      const uploadStatus = document.getElementById('upload-status');
+      const evaluateStatus = document.getElementById('evaluate-status');
+      const studentsTbody = document.getElementById('students-tbody');
+      const summaryGrid = document.getElementById('summary-grid');
+      const highestValue = document.getElementById('highest-value');
+      const lowestValue = document.getElementById('lowest-value');
+      const avgMedianValue = document.getElementById('avg-median-value');
+      const passFailValue = document.getElementById('pass-fail-value');
+      const gradeDistBody = document.getElementById('grade-dist-body');
+      const bandDistBody = document.getElementById('band-dist-body');
+      const bridgeToast = document.getElementById('bridge-toast');
+      const summaryModal = document.getElementById('summary-modal');
+      const viewSummaryBtn = document.getElementById('view-summary-btn');
+      const closeSummaryModal = document.getElementById('close-summary-modal');
+      const summaryNoteList = document.getElementById('summary-note-list');
+
+      const gradeOrder = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F'];
+      const bandOrder = ['Excellent', 'Good', 'Satisfactory', 'At Risk', 'Critical'];
+
+      let activeRunId = null;
+      let latestSummary = null;
+
+      function showToast(message, isError) {
+        if (!bridgeToast) return;
+        bridgeToast.textContent = message || '';
+        bridgeToast.classList.toggle('error', !!isError);
+        bridgeToast.classList.add('show');
+        window.setTimeout(function () {
+          bridgeToast.classList.remove('show');
+        }, 3600);
+      }
+
+      function toggleModal(show) {
+        if (!summaryModal) return;
+        summaryModal.classList.toggle('show', !!show);
+        summaryModal.setAttribute('aria-hidden', show ? 'false' : 'true');
+      }
+
+      function renderDistribution(targetBody, keys, source) {
+        if (!targetBody) return;
+        targetBody.innerHTML = '';
+        keys.forEach(function (key) {
+          const row = document.createElement('tr');
+          row.innerHTML = '<td>' + key + '</td><td>' + (source && source[key] != null ? source[key] : 0) + '</td>';
+          targetBody.appendChild(row);
+        });
+      }
+
+      function renderSummary(summary) {
+        latestSummary = summary || null;
+        if (!summary || !summaryGrid) {
+          if (summaryGrid) summaryGrid.style.display = 'none';
+          return;
+        }
+
+        summaryGrid.style.display = 'grid';
+
+        const highest = summary.highest;
+        const lowest = summary.lowest;
+        highestValue.textContent = highest && highest.student_name ?
+          highest.student_name + ' (' + highest.marks + ')' : 'N/A';
+        lowestValue.textContent = lowest && lowest.student_name ?
+          lowest.student_name + ' (' + lowest.marks + ')' : 'N/A';
+
+        const avg = summary.average_marks != null ? summary.average_marks : 'N/A';
+        const med = summary.median_marks != null ? summary.median_marks : 'N/A';
+        avgMedianValue.textContent = avg + ' / ' + med;
+
+        passFailValue.textContent =
+          (summary.pass_count != null ? summary.pass_count : 0) + ' / ' +
+          (summary.fail_count != null ? summary.fail_count : 0) +
+          ' (' + (summary.pass_percentage != null ? summary.pass_percentage : 0) + '% pass)';
+
+        renderDistribution(gradeDistBody, gradeOrder, summary.grade_distribution || {});
+        renderDistribution(bandDistBody, bandOrder, summary.performance_distribution || {});
+      }
+
+      function renderSummaryNotes(summary) {
+        if (!summaryNoteList) return;
+
+        if (!summary) {
+          summaryNoteList.innerHTML = '<li>Extract midterm data to generate automated insights.</li>';
+          return;
+        }
+
+        const notes = [];
+        notes.push('Maximum marks considered: ' + (summary.max_marks != null ? summary.max_marks : 'N/A'));
+        notes.push('Pass percentage: ' + (summary.pass_percentage != null ? summary.pass_percentage : 0) + '%');
+        notes.push('Critical students (below 10 marks): ' + (summary.critical_count != null ? summary.critical_count : 0));
+
+        if (summary.highest && summary.highest.student_name) {
+          notes.push('Highest marks: ' + summary.highest.student_name + ' (' + summary.highest.marks + ')');
+        }
+        if (summary.lowest && summary.lowest.student_name) {
+          notes.push('Lowest marks: ' + summary.lowest.student_name + ' (' + summary.lowest.marks + ')');
+        }
+
+        summaryNoteList.innerHTML = notes.map(function (note) {
+          return '<li>' + note + '</li>';
+        }).join('');
+      }
+
+      function renderStudents(students) {
+        if (!studentsTbody) return;
+
+        if (!Array.isArray(students) || students.length === 0) {
+          studentsTbody.innerHTML = '<tr><td class="empty-row" colspan="9">No student records available.</td></tr>';
+          return;
+        }
+
+        const rows = students.map(function (student, index) {
+          const riskStatus = student.risk_status || '';
+          const isCritical = riskStatus.toLowerCase().indexOf('critical') === 0;
+          const rowClass = isCritical ? ' class="risk-critical"' : '';
+          const resultPill = student.is_pass ?
+            '<span class="pill pill-pass">Pass</span>' :
+            '<span class="pill pill-fail">Fail</span>';
+          const riskLabel = isCritical ?
+            '<span class="pill pill-critical">Critical</span>' :
+            riskStatus;
+
+          return '<tr' + rowClass + '>' +
+            '<td>' + (index + 1) + '</td>' +
+            '<td>' + (student.registration_no || '-') + '</td>' +
+            '<td>' + (student.student_name || '-') + '</td>' +
+            '<td>' + (student.midterm_marks != null ? student.midterm_marks : '-') + '</td>' +
+            '<td>' + (student.grade || '-') + '</td>' +
+            '<td>' + (student.gpa != null ? student.gpa : '-') + '</td>' +
+            '<td>' + (student.performance_band || '-') + '</td>' +
+            '<td>' + (riskLabel || '-') + '</td>' +
+            '<td>' + resultPill + '</td>' +
+            '</tr>';
+        });
+
+        studentsTbody.innerHTML = rows.join('');
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {}),
+        });
+        const result = await response.json().catch(function () { return {}; });
+        if (!response.ok) {
+          throw new Error(result.error || result.message || 'Request failed.');
+        }
+        return result;
+      }
+
+      if (uploadBtn && fileInput) {
+        uploadBtn.addEventListener('click', function () {
+          fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async function () {
+          const selectedFile = fileInput.files && fileInput.files[0];
+          if (!selectedFile) return;
+
+          const originalHtml = uploadBtn.innerHTML;
+          uploadBtn.disabled = true;
+          uploadBtn.innerHTML = 'Uploading...';
+          uploadStatus.textContent = 'Uploading ' + selectedFile.name + '...';
+
+          try {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const response = await fetch("{% url 'auth_app:midterm_upload_excel' %}", {
+              method: 'POST',
+              body: formData,
+            });
+            const result = await response.json().catch(function () { return {}; });
+            if (!response.ok) {
+              throw new Error(result.error || 'Upload failed.');
+            }
+
+            activeRunId = result.run_id || null;
+            uploadStatus.textContent = (result.file_name || selectedFile.name) + ' uploaded successfully.';
+            evaluateStatus.textContent = 'Now click Extract Midterm Data to evaluate all students automatically.';
+            showToast(result.message || 'Midterm sheet uploaded.', false);
+          } catch (error) {
+            uploadStatus.textContent = error.message || 'Upload failed.';
+            showToast(error.message || 'Upload failed.', true);
+          } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = originalHtml;
+            fileInput.value = '';
+          }
+        });
+      }
+
+      if (extractBtn) {
+        extractBtn.addEventListener('click', async function () {
+          const originalHtml = extractBtn.innerHTML;
+          extractBtn.disabled = true;
+          extractBtn.innerHTML = 'Extracting...';
+          evaluateStatus.textContent = 'Extracting and evaluating midterm data...';
+
+          try {
+            const endpoint = "{% url 'auth_app:midterm_extract_data' %}" +
+              (activeRunId ? ('?run_id=' + encodeURIComponent(activeRunId)) : '');
+            const response = await fetch(endpoint);
+            const result = await response.json().catch(function () { return {}; });
+            if (!response.ok) {
+              throw new Error(result.error || 'Extraction failed.');
+            }
+
+            activeRunId = result.run_id || activeRunId;
+            renderStudents(result.preview_students || []);
+            renderSummary(result.summary || null);
+            renderSummaryNotes(result.summary || null);
+
+            evaluateStatus.textContent = result.message || 'Evaluation completed.';
+            showToast(result.message || 'Midterm data evaluated.', false);
+          } catch (error) {
+            evaluateStatus.textContent = error.message || 'Extraction failed.';
+            showToast(error.message || 'Extraction failed.', true);
+          } finally {
+            extractBtn.disabled = false;
+            extractBtn.innerHTML = originalHtml;
+          }
+        });
+      }
+
+      if (evaluateBtn) {
+        evaluateBtn.addEventListener('click', async function () {
+          const originalHtml = evaluateBtn.innerHTML;
+          evaluateBtn.disabled = true;
+          evaluateBtn.innerHTML = 'Evaluating...';
+          evaluateStatus.textContent = 'Recalculating evaluation...';
+
+          try {
+            const result = await postJson("{% url 'auth_app:midterm_evaluate_data' %}", {
+              run_id: activeRunId,
+            });
+
+            activeRunId = result.run_id || activeRunId;
+            renderStudents(result.preview_students || []);
+            renderSummary(result.summary || null);
+            renderSummaryNotes(result.summary || null);
+
+            evaluateStatus.textContent = result.message || 'Evaluation recalculated.';
+            showToast(result.message || 'Evaluation recalculated.', false);
+          } catch (error) {
+            evaluateStatus.textContent = error.message || 'Evaluation failed.';
+            showToast(error.message || 'Evaluation failed.', true);
+          } finally {
+            evaluateBtn.disabled = false;
+            evaluateBtn.innerHTML = originalHtml;
+          }
+        });
+      }
+
+      if (reportBtn) {
+        reportBtn.addEventListener('click', function () {
+          if (!activeRunId) {
+            showToast('Please upload and extract data before generating report.', true);
+            return;
+          }
+
+          const reportUrl = "{% url 'auth_app:midterm_generate_report' %}" + '?run_id=' + encodeURIComponent(activeRunId);
+          window.location.href = reportUrl;
+          showToast('Generating report. Your download should begin shortly.', false);
+        });
+      }
+
+      if (viewSummaryBtn) {
+        viewSummaryBtn.addEventListener('click', function () {
+          renderSummaryNotes(latestSummary);
+          toggleModal(true);
+        });
+      }
+
+      if (closeSummaryModal) {
+        closeSummaryModal.addEventListener('click', function () {
+          toggleModal(false);
+        });
+      }
+
+      if (summaryModal) {
+        summaryModal.addEventListener('click', function (event) {
+          if (event.target === summaryModal) {
+            toggleModal(false);
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

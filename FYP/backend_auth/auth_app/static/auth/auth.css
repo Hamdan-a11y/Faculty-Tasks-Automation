@@ -1,0 +1,134 @@
+/* SZABIST-themed auth screen */
+:root {
+  --navy: #14304b;
+  --navy-soft: #1f4c72;
+  --teal: #1d8f8a;
+  --teal-soft: #25a7a0;
+  --white: #ffffff;
+  --text: #101820;
+  --muted: #4a6070;
+  --shadow: 0 18px 60px rgba(0, 0, 0, 0.12);
+  --font-primary: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-primary);
+  background: radial-gradient(circle at 18% 20%, #e8f3ff 0, #f4f8ff 35%, #f8fbff 70%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+.top-banner {
+  background: linear-gradient(120deg, var(--teal) 0%, var(--teal-soft) 40%, var(--navy-soft) 100%);
+  color: #e8efff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.brand-text { max-width: 640px; }
+.brand-title { font-weight: 700; font-size: 16px; line-height: 1.4; color: #eef3ff; }
+.campus { font-weight: 600; color: #e3ecff; }
+
+.auth-page {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 44px 18px 36px;
+}
+
+.hero {
+  text-align: center;
+  padding: 32px 18px 28px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  width: min(720px, 96vw);
+  position: relative;
+}
+.hero > * { position: relative; }
+.hero-icon {
+  font-size: 54px;
+  margin-bottom: 16px;
+}
+.title {
+  margin: 0 0 12px;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--navy);
+}
+.subtitle {
+  margin: 0 0 32px;
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.google-btn {
+  width: min(440px, 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border: 1px solid #dfe1e5;
+  border-radius: 12px;
+  background: var(--white);
+  color: #1f1f1f;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+.google-btn:hover {
+  border-color: #c3d9e6;
+  box-shadow: 0 12px 28px rgba(31, 111, 139, 0.18);
+  transform: translateY(-1px);
+}
+.google-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.25), 0 12px 28px rgba(31, 111, 139, 0.18);
+}
+.google-btn:active { transform: translateY(0); }
+.google-icon { width: 22px; height: 22px; }
+
+.footer-banner {
+  background: linear-gradient(120deg, var(--navy-soft) 0%, var(--teal) 60%, var(--teal-soft) 100%);
+  color: #e8efff;
+  text-align: center;
+  padding: 14px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 680px) {
+  .brand-title { font-size: 14px; }
+  .brand-mark { width: 40px; height: 40px; font-size: 13px; }
+  .hero { padding: 38px 24px; width: min(520px, 94vw); }
+  .title { font-size: 28px; }
+  .subtitle { font-size: 16px; }
+}
+@media (max-width: 480px) {
+  .top-banner { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .campus { align-self: flex-start; }
+  .hero { padding: 32px 18px; border-radius: 14px; }
+  .title { font-size: 24px; }
+  .subtitle { font-size: 15px; }
+}

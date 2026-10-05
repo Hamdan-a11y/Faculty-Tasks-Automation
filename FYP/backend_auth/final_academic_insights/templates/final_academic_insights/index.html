@@ -1,0 +1,235 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Final Academic Insights | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <link rel="stylesheet" href="{% static 'final_academic_insights/style.css' %}" />
+  <!-- Chart.js Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" />
+      </div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard
+        </a>
+        <a class="nav-item" href="#">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer
+        </a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker
+        </a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder
+        </a>
+        <a class="nav-item" href="#">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge
+        </a>
+        <a class="nav-item" href="#">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator
+        </a>
+        <a class="nav-item" href="#">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant
+        </a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption
+        </a>
+        <a class="nav-item active" href="{% url 'final_academic_insights:index' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights
+        </a>
+        <a class="nav-item" href="{% url 'academic_report:index' %}">
+          <img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name" id="facultyName">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome">Final Academic Insights</div>
+        <div class="topbar-actions">
+          <span class="badge-inline">Analytics</span>
+          <div class="user-dropdown">
+            <button class="user-btn">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Control Panels -->
+      <section class="control-grid">
+        <!-- Excel Upload Card -->
+        <div class="card-panel">
+          <h3>Upload Class Spreadsheet</h3>
+          <p>Provide an Excel file (.xlsx, .xlsm, .xlsb, .xltx, .xltm, .xls) containing parsed student marks (Quizzes 1-4, Assignments 1-4, Midterm, and Final).</p>
+          
+          <form id="uploadExcelForm">
+            <div class="file-upload-wrapper">
+              <input type="file" name="file" id="excelFile" accept=".xlsx,.xlsm,.xlsb,.xltx,.xltm,.xls" class="file-input" />
+              <label for="excelFile" class="file-label">
+                <span class="file-label-text">Select Excel file...</span>
+              </label>
+            </div>
+            <button class="btn btn-primary" type="submit" id="btnUpload">Upload File</button>
+          </form>
+          <div id="uploadStatus" class="status-msg"></div>
+        </div>
+
+        <!-- Analytics Controls -->
+        <div class="card-panel flex-column justify-between">
+          <div>
+            <h3>Actions & Reports</h3>
+            <p>Fetch details from the stored records to compute student performance metrics and generate graphics.</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" id="btnGenerateReport" type="button" title="Fetch all data and populate stats, charts, insights & table below">📋 Generate Report</button>
+            <button class="btn btn-secondary" id="btnShowGraph" type="button" title="Display the 4 performance charts (Pass/Fail, Grades, Assessment, Trend)">📊 Show Graph</button>
+            <button class="btn btn-primary" id="btnDownloadExcel" type="button" style="display: none;" title="Download complete 5-sheet Excel workbook with all data">⬇ Download Excel</button>
+          </div>
+          <p class="btn-help-text" style="margin: 8px 0 0 0; font-size: 0.78rem; color: #64748b; line-height: 1.5;">
+            <strong>Generate Report</strong> → populates stats, insights &amp; student table below.<br>
+            <strong>Show Graph</strong> → renders the 4 performance charts.<br>
+            <strong>Download Excel</strong> → saves a 5-sheet .xlsx file with everything.
+          </p>
+          <div id="actionStatus" class="status-msg"></div>
+        </div>
+      </section>
+
+      <!-- Summary Stats Cards -->
+      <section class="stats-grid" id="statsGrid" style="display: none;">
+        <div class="stat-card">
+          <span class="stat-title">Total Students</span>
+          <span class="stat-value" id="valTotalStudents">0</span>
+        </div>
+        <div class="stat-card pass">
+          <span class="stat-title">Passed Students</span>
+          <span class="stat-value" id="valPassedStudents">0</span>
+          <span class="stat-sub" id="pctPassed">0%</span>
+        </div>
+        <div class="stat-card fail">
+          <span class="stat-title">Failed Students</span>
+          <span class="stat-value" id="valFailedStudents">0</span>
+          <span class="stat-sub" id="pctFailed">0%</span>
+        </div>
+        <div class="stat-card avg">
+          <span class="stat-title">Average Class Score</span>
+          <span class="stat-value" id="valAverageScore">0</span>
+          <span class="stat-sub">%</span>
+        </div>
+        <div class="stat-card high">
+          <span class="stat-title">Highest Score</span>
+          <span class="stat-value" id="valHighestScore">0</span>
+          <span class="stat-sub">%</span>
+        </div>
+      </section>
+
+      <!-- Charts Row 1: Pass/Fail + Grade Distribution -->
+      <section class="charts-row" id="chartsRow1" style="display: none;">
+        <div class="card-panel graph-panel" id="graphContainer">
+          <h3>Pass/Fail Distribution</h3>
+          <div class="chart-wrapper">
+            <canvas id="insightsChart"></canvas>
+          </div>
+        </div>
+        <div class="card-panel graph-panel" id="gradeDistContainer">
+          <h3>Grade Distribution</h3>
+          <div class="chart-wrapper-wide">
+            <canvas id="gradeDistChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Row 2: Assessment Breakdown + Trend -->
+      <section class="charts-row" id="chartsRow2" style="display: none;">
+        <div class="card-panel graph-panel" id="assessmentContainer">
+          <h3>Assessment Performance Breakdown</h3>
+          <div class="chart-wrapper-wide">
+            <canvas id="assessmentChart"></canvas>
+          </div>
+        </div>
+        <div class="card-panel graph-panel" id="trendContainer">
+          <h3>Performance Trend</h3>
+          <div class="chart-wrapper-wide">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Insights Section -->
+      <section class="insights-section" id="insightsSection" style="display: none;">
+        <div class="card-panel">
+          <h3>📊 Final Academic Insights</h3>
+          <ul class="insights-list" id="insightsList">
+            <!-- Insights injected dynamically -->
+          </ul>
+        </div>
+      </section>
+
+      <!-- Student Records Table -->
+      <section class="table-section" id="tableContainer" style="display: none;">
+        <div class="card-panel table-panel">
+          <div class="table-header">
+            <h3>Student Performance Sheet</h3>
+            <span class="badge" id="recordCount">0 records</span>
+          </div>
+          <div class="table-scroll">
+            <table aria-label="Student Marks Table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Q1</th>
+                  <th>Q2</th>
+                  <th>Q3</th>
+                  <th>Q4</th>
+                  <th>A1</th>
+                  <th>A2</th>
+                  <th>A3</th>
+                  <th>A4</th>
+                  <th>Mid</th>
+                  <th>Final</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="{% static 'final_academic_insights/script.js' %}"></script>
+</body>
+
+</html>

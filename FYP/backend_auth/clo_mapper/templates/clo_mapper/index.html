@@ -1,0 +1,231 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CLO Assessment Mapper | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <style>
+    .card-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      margin-top: 12px;
+    }
+
+    .card-panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-panel h3 {
+      margin: 0 0 6px;
+      color: #0d3b57;
+    }
+
+    .card-panel p { margin: 0 0 12px; color: #4c5b68; }
+
+    .section-title { font-size: 18px; font-weight: 700; color: #0d3b57; margin-bottom: 8px; }
+
+    .input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+
+    .input-row input[type="file"], .input-row select, .input-row textarea {
+      width: 100%;
+    }
+
+    textarea { width: 100%; min-height: 120px; border-radius: 10px; padding: 10px; border: 1px solid #dbe7f3; }
+
+    .btn { border: none; border-radius: 10px; padding: 10px 16px; font-weight: 700; cursor: pointer; transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; }
+
+    .btn-primary { background: #1f6f8b; color: #fff; box-shadow: 0 6px 16px rgba(31, 111, 139, 0.25); }
+    .btn-primary:hover, .btn-primary:focus { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 10px 24px rgba(31, 111, 139, 0.3); }
+    .btn-primary:active { transform: translateY(0); box-shadow: 0 4px 10px rgba(31, 111, 139, 0.35); }
+
+    .btn-secondary { background: #f5f8fb; color: #0d3b57; box-shadow: 0 4px 12px rgba(13, 59, 87, 0.08); }
+    .btn-secondary:hover, .btn-secondary:focus { transform: translateY(-1px); filter: brightness(1.03); box-shadow: 0 8px 18px rgba(13, 59, 87, 0.12); }
+    .btn-secondary:active { transform: translateY(0); box-shadow: 0 4px 10px rgba(13, 59, 87, 0.16); }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e5ecf3; }
+
+    .pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+
+    .pill.green { background: #e6f4ea; color: #1f8b4d; }
+
+    .pill.yellow { background: #fff7e6; color: #b26a00; }
+
+    .pill.red { background: #ffeaea; color: #b23b3b; }
+
+    .status { font-weight: 700; color: #0d3b57; }
+
+    .muted { color: #6c7a86; }
+
+    .flex { display: flex; align-items: center; gap: 8px; }
+
+    .dropdown { min-width: 160px; padding: 8px; border-radius: 8px; border: 1px solid #dbe7f3; }
+
+    .table-card { margin-top: 14px; }
+
+    .badge-inline { background: #0d3b57; color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 12px; }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer</a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item active" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration</a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant</a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name" id="facultyName">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome">CLO Assessment Mapper</div>
+        <div class="topbar-actions">
+          <span class="badge-inline">Beta</span>
+          <div class="user-dropdown">
+            <button class="user-btn">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="card-grid">
+        <div class="card-panel">
+          <h3>Upload CLOs</h3>
+          <p>Upload the provided CLOs as a Word document with clear descriptions.</p>
+          <form id="cloUploadForm">
+            <div class="input-row">
+              <input type="text" id="cloCourse" name="course" placeholder="Course (e.g., Fundamentals of Programming)" />
+            </div>
+            <div class="input-row">
+              <input type="file" name="file" id="cloFile" accept=".docx,.pdf" />
+            </div>
+            <button class="btn btn-primary" type="submit">Upload CLOs</button>
+          </form>
+          <div class="muted" id="cloStatus"></div>
+        </div>
+
+        <div class="card-panel">
+          <h3>Upload / Enter Questions</h3>
+          <p>Paste questions or upload a Word/PDF/image.</p>
+          <form id="questionForm">
+            <div class="input-row">
+              <select name="assessment_type" id="assessmentType" class="dropdown">
+                <option value="quiz">Quiz</option>
+                <option value="assignment">Assignment</option>
+                <option value="midterm">Midterm</option>
+                <option value="final">Final</option>
+                <option value="unspecified" selected>Unspecified</option>
+              </select>
+            </div>
+            <div class="input-row">
+              <textarea name="text" id="questionText" placeholder="Paste questions here... (optional)"></textarea>
+            </div>
+            <div class="input-row">
+              <input type="file" name="files" id="questionFiles" accept=".docx,.pdf,.png,.jpg,.jpeg" multiple />
+            </div>
+            <button class="btn btn-primary" type="submit">Upload Questions</button>
+          </form>
+          <div class="muted" id="questionStatus"></div>
+        </div>
+
+        <div class="card-panel">
+          <h3>CLO Mapping</h3>
+          <p>Automatically match questions to CLOs, then adjust any matches you want.</p>
+          <div class="input-row">
+            <select id="mappingAssessment" class="dropdown">
+              <option value="">All assessments</option>
+              <option value="quiz">Quiz</option>
+              <option value="assignment">Assignment</option>
+              <option value="midterm">Midterm</option>
+              <option value="final">Final</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <select id="mappingCourse" class="dropdown">
+              <option value="">All courses</option>
+            </select>
+          </div>
+          <div class="flex" style="gap: 10px; margin-top: 8px;">
+            <button class="btn btn-primary" id="runMappingBtn" type="button">Map CLOs</button>
+            <button class="btn btn-secondary" id="refreshBtn" type="button">Refresh Lists</button>
+          </div>
+          <div class="muted" id="mappingStatus"></div>
+        </div>
+      </section>
+
+      <section class="table-card card-panel">
+        <div class="section-title">Extracted CLOs</div>
+        <div class="flex" style="justify-content:flex-end; gap:10px; margin-bottom:8px;">
+          <button class="btn btn-secondary" id="clearClosBtn" type="button">Clear CLOs</button>
+        </div>
+        <div class="muted" id="closEmpty">Upload a CLO table to see entries.</div>
+        <table aria-label="Extracted CLOs">
+          <thead>
+            <tr><th>CLO</th><th>Description</th><th>Domain</th><th>BT Level</th></tr>
+          </thead>
+          <tbody id="closTable"></tbody>
+        </table>
+        <div class="muted" style="margin-top:6px;">
+          BT = Bloom's Taxonomy; C = Cognitive domain; P = Psychomotor domain; A = Affective domain.
+        </div>
+      </section>
+
+      <section class="table-card card-panel">
+        <div class="section-title">Questions</div>
+        <div class="flex" style="justify-content:flex-end; gap:10px; margin-bottom:8px;">
+          <button class="btn btn-secondary" id="clearQuestionsBtn" type="button">Clear Questions</button>
+        </div>
+        <div class="muted" id="questionsEmpty">Upload questions to populate this list.</div>
+        <table aria-label="Questions">
+          <thead>
+            <tr><th>Text</th><th>Source</th></tr>
+          </thead>
+          <tbody id="questionsTable"></tbody>
+        </table>
+      </section>
+
+      <section class="table-card card-panel">
+        <div class="section-title">Mapping Results</div>
+        <div class="muted" id="mappingEmpty">Run mapping to see results.</div>
+        <table aria-label="Mapping results">
+          <thead>
+            <tr><th>Question</th><th>Mapped CLO</th></tr>
+          </thead>
+          <tbody id="mappingTable"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <script src="{% static 'clo_mapper/main.js' %}"></script>
+</body>
+
+</html>

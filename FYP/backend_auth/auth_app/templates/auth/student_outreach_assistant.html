@@ -1,0 +1,1057 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Outreach Assistant | Faculty Tasks Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'auth/dashboard.css' %}" />
+  <style>
+    .outreach-wrap {
+      display: grid;
+      gap: 16px;
+    }
+
+    .outreach-head h2 {
+      margin: 0;
+      font-size: 1.9rem;
+      color: #13293d;
+    }
+
+    .outreach-head p {
+      margin: 8px 0 0;
+      color: #5d748e;
+    }
+
+    .module-card {
+      background: #fff;
+      border: 1px solid #e4ebf3;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(16, 32, 48, 0.05);
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .count-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .count-pill {
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .count-critical {
+      background: #ffdedd;
+      color: #9e2a2f;
+    }
+
+    .count-risk {
+      background: #fff2df;
+      color: #995800;
+    }
+
+    .count-total {
+      background: #dff3fb;
+      color: #0d3b57;
+    }
+
+    .template-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      color: #3e5c74;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      border: 1px solid #cfdeea;
+      border-radius: 10px;
+      color: #17364d;
+      font-family: inherit;
+      font-size: 0.92rem;
+      padding: 10px 11px;
+      width: 100%;
+      outline: none;
+      background: #fff;
+    }
+
+    .field textarea {
+      min-height: 180px;
+      line-height: 1.45;
+      resize: vertical;
+      white-space: pre-wrap;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: #2a84bf;
+      box-shadow: 0 0 0 3px rgba(42, 132, 191, 0.12);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .action-btn {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 10px 14px;
+      min-height: 40px;
+      transition: filter 120ms ease;
+      background: linear-gradient(135deg, #2686c3, #0f5f90);
+      color: #fff;
+    }
+
+    .action-btn:hover {
+      filter: brightness(1.03);
+    }
+
+    .action-btn.secondary {
+      background: #e7eef6;
+      color: #234663;
+    }
+
+    .action-btn:disabled {
+      cursor: wait;
+      opacity: 0.65;
+      filter: none;
+    }
+
+    .status-text {
+      margin: 0;
+      color: #1f4260;
+      font-size: 0.92rem;
+      min-height: 20px;
+    }
+
+    .progress-wrap {
+      display: none;
+      gap: 8px;
+    }
+
+    .progress-wrap.show {
+      display: grid;
+    }
+
+    .progress-text {
+      color: #375b76;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #e4ecf4;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(135deg, #2a8cc8, #126192);
+      transition: width 140ms ease;
+    }
+
+    .section-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1.7fr 1fr;
+    }
+
+    .table-card {
+      background: #fff;
+      border: 1px solid #e4ebf3;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(16, 32, 48, 0.05);
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      color: #153650;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      font-size: 0.9rem;
+    }
+
+    th,
+    td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #edf2f8;
+      color: #17364d;
+      vertical-align: top;
+    }
+
+    thead {
+      background: #dff3fb;
+      color: #0d3b57;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: #f9fcff;
+    }
+
+    .empty-row {
+      text-align: center;
+      color: #6c8093;
+      padding: 14px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      line-height: 1;
+      padding: 7px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .pill-critical {
+      background: #ffdedd;
+      color: #9e2a2f;
+    }
+
+    .pill-risk {
+      background: #fff2df;
+      color: #995800;
+    }
+
+    .pill-sent {
+      background: #e8f8ef;
+      color: #1f8b4d;
+    }
+
+    .pill-failed {
+      background: #ffe7e5;
+      color: #b3261e;
+    }
+
+    .preview-box,
+    .failure-box {
+      border: 1px solid #dbe8f2;
+      border-radius: 12px;
+      padding: 12px;
+      background: #f8fbff;
+    }
+
+    .preview-subject {
+      margin: 0 0 8px;
+      color: #14364f;
+      font-weight: 700;
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+
+    .preview-body {
+      margin: 0;
+      color: #1e3b54;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow: auto;
+    }
+
+    .failure-box {
+      display: none;
+      background: #fff8f7;
+      border-color: #f4d4d2;
+    }
+
+    .failure-box.show {
+      display: block;
+    }
+
+    .failure-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #7c262a;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    .history-card {
+      background: #fff;
+      border: 1px solid #e4ebf3;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(16, 32, 48, 0.05);
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .history-card table {
+      min-width: 980px;
+    }
+
+    .bridge-toast {
+      background: #103a57;
+      border-radius: 10px;
+      bottom: 18px;
+      box-shadow: 0 12px 24px rgba(9, 34, 53, 0.24);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 600;
+      max-width: 560px;
+      opacity: 0;
+      padding: 10px 14px;
+      pointer-events: none;
+      position: fixed;
+      right: 18px;
+      transform: translateY(10px);
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 1300;
+    }
+
+    .bridge-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bridge-toast.error {
+      background: #9e2a2f;
+    }
+
+    .dropdown.show {
+      display: block;
+    }
+
+    @media (max-width: 1240px) {
+      .template-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+      }
+
+      .section-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .template-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .action-btn {
+        width: 100%;
+      }
+
+      .bridge-toast {
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><img src="{% static 'auth/icons/szabist-logo.png' %}" alt="SZABIST University" /></div>
+      <nav class="nav">
+        <a class="nav-item" href="{% url 'auth_app:dashboard' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Dashboard</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Authentication Module</a>
+        <a class="nav-item" href="{% url 'auth_app:curriculum' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Curriculum Initializer</a>
+        <a class="nav-item" href="{% url 'class_progress:tracker' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Class Progress Tracker</a>
+        <a class="nav-item" href="{% url 'clo_mapper:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />CLO Assessment Mapper</a>
+        <a class="nav-item" href="{% url 'auth_app:google_services' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Google Services Integration</a>
+        <a class="nav-item" href="{% url 'auth_app:auto_reminder' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Auto Reminder</a>
+        <a class="nav-item" href="{% url 'auth_app:zabdesk_marks_bridge' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Zabdesk Marks Bridge</a>
+        <a class="nav-item" href="{% url 'auth_app:midterm_academic_evaluator' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Midterm Academic Evaluator</a>
+        <a class="nav-item active" href="{% url 'auth_app:student_outreach_assistant' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Student Outreach Assistant</a>
+        <a class="nav-item" href="{% url 'auth_app:attendance_exemption' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Attendance Exemption</a>
+        <a class="nav-item" href="{% url 'final_academic_insights:index' %}"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Final Academic Insights</a>
+        <a class="nav-item" href="#"><img src="{% static 'auth/icons/module.svg' %}" alt="" />Academic Report Generator</a>
+      </nav>
+      <div class="sidebar-footer">
+        <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+        <div class="faculty-name">{{ user_name|default:"Faculty" }}</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="welcome">Welcome, {{ user_name|default:"Faculty" }}</div>
+        <div class="topbar-actions">
+          <button class="icon-btn" aria-label="Notifications"><img src="{% static 'auth/icons/bell.svg' %}" alt="" /></button>
+          <button class="icon-btn" aria-label="Settings"><img src="{% static 'auth/icons/settings.svg' %}" alt="" /></button>
+          <form action="{% url 'auth_app:logout' %}" method="get" style="margin:0;">
+            <button class="logout-btn" type="submit" title="Sign out">
+              <span class="logout-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="1.4" fill="none" />
+                  <path d="M13.5 8.5L9.5 12L13.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M10 12H16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>Logout</span>
+            </button>
+          </form>
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn" type="button">
+              <img src="{% static 'auth/icons/user.svg' %}" alt="" />
+              <span>{{ user_name|default:"Faculty" }}</span>
+            </button>
+            <div class="dropdown" id="userMenu">
+              <a href="#">Profile</a>
+              <a href="#">Preferences</a>
+              <a href="{% url 'auth_app:logout' %}">Sign out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="outreach-wrap" aria-label="Student outreach assistant module">
+        <div class="outreach-head">
+          <h2>Student Outreach Assistant</h2>
+          <p>Identify all at-risk and critical students from Midterm Evaluation and dispatch personalized support emails through Mailtrap sandbox.</p>
+        </div>
+
+        <div class="module-card">
+          <div class="count-strip">
+            <div class="count-pill count-critical"><span id="critical-count">0</span> Critical</div>
+            <div class="count-pill count-risk"><span id="atrisk-count">0</span> At Risk</div>
+            <div class="count-pill count-total"><span id="total-count">0</span> Total Alerts To Send</div>
+          </div>
+
+          <div class="template-grid">
+            <div class="field">
+              <label for="course-name">Course Name</label>
+              <input id="course-name" type="text" placeholder="e.g. FOP (CS101)" />
+            </div>
+            <div class="field">
+              <label for="faculty-name">Faculty Name</label>
+              <input id="faculty-name" type="text" placeholder="e.g. Muhammad Hamdan" />
+            </div>
+            <div class="field">
+              <label for="institution-name">Institution</label>
+              <input id="institution-name" type="text" placeholder="e.g. SZABIST Islamabad" />
+            </div>
+
+            <div class="field full">
+              <label for="subject-template">Email Subject Template</label>
+              <input id="subject-template" type="text" />
+            </div>
+
+            <div class="field full">
+              <label for="body-template">Email Body Template</label>
+              <textarea id="body-template"></textarea>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button id="refresh-btn" class="action-btn secondary" type="button">Refresh At-Risk Data</button>
+            <select id="preview-student-select" style="min-width:220px;"></select>
+            <button id="preview-btn" class="action-btn secondary" type="button">Preview Email</button>
+            <button id="send-alerts-btn" class="action-btn" type="button">Send Alert Emails</button>
+            <button id="resend-failed-btn" class="action-btn secondary" type="button">Resend Failed Students</button>
+          </div>
+
+          <div id="progress-wrap" class="progress-wrap" aria-live="polite">
+            <div id="progress-text" class="progress-text">Sending 0 of 0...</div>
+            <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+          </div>
+
+          <p id="outreach-status" class="status-text" aria-live="polite"></p>
+        </div>
+
+        <div class="section-grid">
+          <div class="table-card">
+            <h3 class="section-title">At-Risk Student Dashboard</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Reg. No</th>
+                  <th>Midterm Marks</th>
+                  <th>Risk Status</th>
+                  <th>Grade</th>
+                  <th>Email (Generated)</th>
+                </tr>
+              </thead>
+              <tbody id="students-body">
+                <tr>
+                  <td class="empty-row" colspan="7">Loading outreach students...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-card">
+            <h3 class="section-title">Email Preview</h3>
+            <div class="preview-box">
+              <p id="preview-subject" class="preview-subject">Subject preview will appear here.</p>
+              <pre id="preview-body" class="preview-body">Body preview will appear here.</pre>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 12px;">Error Summary</h3>
+            <div id="failure-box" class="failure-box">
+              <ol id="failure-list" class="failure-list"></ol>
+            </div>
+            <p id="failure-empty" class="status-text">No failed sends yet.</p>
+          </div>
+        </div>
+
+        <div class="history-card">
+          <h3 class="section-title">Send History</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Recipient</th>
+                <th>Reg. No</th>
+                <th>Email</th>
+                <th>Risk</th>
+                <th>Status</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody id="history-body">
+              <tr>
+                <td class="empty-row" colspan="7">No send history yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="bridge-toast" class="bridge-toast" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      const userBtn = document.getElementById('userBtn');
+      const userMenu = document.getElementById('userMenu');
+      if (userBtn && userMenu) {
+        userBtn.addEventListener('click', function () {
+          userMenu.classList.toggle('show');
+        });
+        document.addEventListener('click', function (event) {
+          if (!userBtn.contains(event.target) && !userMenu.contains(event.target)) {
+            userMenu.classList.remove('show');
+          }
+        });
+      }
+
+      const bridgeToast = document.getElementById('bridge-toast');
+      const refreshBtn = document.getElementById('refresh-btn');
+      const previewBtn = document.getElementById('preview-btn');
+      const sendAlertsBtn = document.getElementById('send-alerts-btn');
+      const resendFailedBtn = document.getElementById('resend-failed-btn');
+      const previewStudentSelect = document.getElementById('preview-student-select');
+
+      const criticalCountEl = document.getElementById('critical-count');
+      const atriskCountEl = document.getElementById('atrisk-count');
+      const totalCountEl = document.getElementById('total-count');
+      const outreachStatus = document.getElementById('outreach-status');
+
+      const courseNameInput = document.getElementById('course-name');
+      const facultyNameInput = document.getElementById('faculty-name');
+      const institutionNameInput = document.getElementById('institution-name');
+      const subjectTemplateInput = document.getElementById('subject-template');
+      const bodyTemplateInput = document.getElementById('body-template');
+
+      const studentsBody = document.getElementById('students-body');
+      const historyBody = document.getElementById('history-body');
+      const previewSubject = document.getElementById('preview-subject');
+      const previewBody = document.getElementById('preview-body');
+
+      const progressWrap = document.getElementById('progress-wrap');
+      const progressText = document.getElementById('progress-text');
+      const progressFill = document.getElementById('progress-fill');
+
+      const failureBox = document.getElementById('failure-box');
+      const failureList = document.getElementById('failure-list');
+      const failureEmpty = document.getElementById('failure-empty');
+
+      const API = {
+        atRisk: "{% url 'auth_app:student_outreach_at_risk_students' %}",
+        preview: "{% url 'auth_app:student_outreach_preview_email' %}",
+        sendSingle: "{% url 'auth_app:student_outreach_send_single' %}",
+        sendSummary: "{% url 'auth_app:student_outreach_send_faculty_summary' %}",
+        history: "{% url 'auth_app:student_outreach_email_history' %}",
+        resendFailed: "{% url 'auth_app:student_outreach_resend_failed' %}",
+      };
+
+      let activeRunId = null;
+      let outreachStudents = [];
+      let templatesInitialized = false;
+
+      function showToast(message, isError) {
+        if (!bridgeToast) return;
+        bridgeToast.textContent = message || '';
+        bridgeToast.classList.toggle('error', !!isError);
+        bridgeToast.classList.add('show');
+        window.setTimeout(function () {
+          bridgeToast.classList.remove('show');
+        }, 3600);
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function setSendingState(isSending) {
+        refreshBtn.disabled = isSending;
+        previewBtn.disabled = isSending;
+        sendAlertsBtn.disabled = isSending;
+        resendFailedBtn.disabled = isSending;
+      }
+
+      function updateProgress(current, total) {
+        if (!progressWrap || !progressText || !progressFill) return;
+        if (!total) {
+          progressWrap.classList.remove('show');
+          progressFill.style.width = '0%';
+          progressText.textContent = 'Sending 0 of 0...';
+          return;
+        }
+
+        progressWrap.classList.add('show');
+        progressText.textContent = 'Sending ' + current + ' of ' + total + '...';
+        const percent = Math.min(100, Math.round((current / total) * 100));
+        progressFill.style.width = percent + '%';
+      }
+
+      function renderFailureSummary(failures) {
+        if (!failureBox || !failureList || !failureEmpty) return;
+
+        if (!Array.isArray(failures) || failures.length === 0) {
+          failureBox.classList.remove('show');
+          failureList.innerHTML = '';
+          failureEmpty.textContent = 'No failed sends yet.';
+          return;
+        }
+
+        failureList.innerHTML = failures.map(function (failure) {
+          const reg = escapeHtml(failure.registration_no || 'N/A');
+          const name = escapeHtml(failure.student_name || 'N/A');
+          const reason = escapeHtml(failure.error || 'Unknown error');
+          return '<li>[' + reg + '] ' + name + ' - ' + reason + '</li>';
+        }).join('');
+
+        failureEmpty.textContent = '';
+        failureBox.classList.add('show');
+      }
+
+      function renderStudentsTable(students) {
+        if (!studentsBody) return;
+
+        if (!Array.isArray(students) || students.length === 0) {
+          studentsBody.innerHTML = '<tr><td class="empty-row" colspan="7">No At Risk or Critical students found in current run.</td></tr>';
+          return;
+        }
+
+        studentsBody.innerHTML = students.map(function (student, index) {
+          const riskText = (student.risk_status || '').toLowerCase().indexOf('critical') === 0 ?
+            '<span class="pill pill-critical">Critical</span>' :
+            '<span class="pill pill-risk">At Risk</span>';
+
+          return '<tr>' +
+            '<td>' + (index + 1) + '</td>' +
+            '<td>' + escapeHtml(student.student_name || '-') + '</td>' +
+            '<td>' + escapeHtml(student.registration_no || '-') + '</td>' +
+            '<td>' + escapeHtml(student.midterm_marks != null ? student.midterm_marks : '-') + '</td>' +
+            '<td>' + riskText + '</td>' +
+            '<td>' + escapeHtml(student.grade_letter || '-') + '</td>' +
+            '<td>' + escapeHtml(student.generated_email || '-') + '</td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      function renderPreviewStudentOptions(students) {
+        if (!previewStudentSelect) return;
+
+        if (!Array.isArray(students) || students.length === 0) {
+          previewStudentSelect.innerHTML = '<option value="">No students available</option>';
+          previewStudentSelect.disabled = true;
+          return;
+        }
+
+        previewStudentSelect.disabled = false;
+        previewStudentSelect.innerHTML = students.map(function (student) {
+          const label = (student.student_name || 'Student') + ' (' + (student.registration_no || 'N/A') + ')';
+          return '<option value="' + student.id + '">' + escapeHtml(label) + '</option>';
+        }).join('');
+      }
+
+      function renderPreview(subject, body, studentName) {
+        if (previewSubject) {
+          previewSubject.textContent = (studentName ? 'For: ' + studentName + ' | ' : '') + (subject || 'No subject generated.');
+        }
+        if (previewBody) {
+          previewBody.textContent = body || 'No body generated.';
+        }
+      }
+
+      function renderHistoryRows(history) {
+        if (!historyBody) return;
+
+        if (!Array.isArray(history) || history.length === 0) {
+          historyBody.innerHTML = '<tr><td class="empty-row" colspan="7">No send history yet.</td></tr>';
+          return;
+        }
+
+        historyBody.innerHTML = history.map(function (row) {
+          const statusPill = String(row.status || '').toLowerCase() === 'sent' ?
+            '<span class="pill pill-sent">Sent</span>' :
+            '<span class="pill pill-failed">Failed</span>';
+          const recipient = row.recipient_type === 'faculty_summary' ? 'Faculty Summary' : (row.student_name || '-');
+          const reason = row.error_message || '-';
+
+          return '<tr>' +
+            '<td>' + escapeHtml(new Date(row.created_at).toLocaleString()) + '</td>' +
+            '<td>' + escapeHtml(recipient) + '</td>' +
+            '<td>' + escapeHtml(row.registration_no || '-') + '</td>' +
+            '<td>' + escapeHtml(row.email_address || '-') + '</td>' +
+            '<td>' + escapeHtml(row.risk_level || '-') + '</td>' +
+            '<td>' + statusPill + '</td>' +
+            '<td>' + escapeHtml(reason) + '</td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {}),
+        });
+
+        const result = await response.json().catch(function () { return {}; });
+        if (!response.ok) {
+          throw new Error(result.error || result.detail || 'Request failed.');
+        }
+        return result;
+      }
+
+      async function loadHistory() {
+        if (!activeRunId) {
+          renderHistoryRows([]);
+          return;
+        }
+
+        const historyUrl = API.history + '?run_id=' + encodeURIComponent(activeRunId);
+        const response = await fetch(historyUrl);
+        const result = await response.json().catch(function () { return {}; });
+        if (!response.ok) {
+          throw new Error(result.error || 'Unable to load send history.');
+        }
+
+        renderHistoryRows(result.history || []);
+      }
+
+      async function loadAtRiskStudents() {
+        outreachStatus.textContent = 'Loading at-risk students from latest midterm evaluation...';
+        const endpoint = API.atRisk + (activeRunId ? ('?run_id=' + encodeURIComponent(activeRunId)) : '');
+
+        const response = await fetch(endpoint);
+        const result = await response.json().catch(function () { return {}; });
+        if (!response.ok) {
+          throw new Error(result.error || result.detail || 'Unable to fetch at-risk students.');
+        }
+
+        activeRunId = result.run_id || activeRunId;
+        outreachStudents = Array.isArray(result.students) ? result.students : [];
+
+        const counts = result.counts || {};
+        criticalCountEl.textContent = counts.critical != null ? counts.critical : 0;
+        atriskCountEl.textContent = counts.at_risk != null ? counts.at_risk : 0;
+        totalCountEl.textContent = counts.total != null ? counts.total : 0;
+
+        renderStudentsTable(outreachStudents);
+        renderPreviewStudentOptions(outreachStudents);
+
+        if (!templatesInitialized) {
+          subjectTemplateInput.value = (result.templates && result.templates.subject_template) || '';
+          bodyTemplateInput.value = (result.templates && result.templates.body_template) || '';
+          templatesInitialized = true;
+        }
+
+        if (!courseNameInput.value) {
+          courseNameInput.value = result.course_name || '';
+        }
+        if (!facultyNameInput.value) {
+          facultyNameInput.value = result.faculty_name || '';
+        }
+        if (!institutionNameInput.value) {
+          institutionNameInput.value = result.institution_name || '';
+        }
+
+        if (result.preview) {
+          const previewStudent = outreachStudents.find(function (s) { return s.id === result.preview.student_id; });
+          renderPreview(result.preview.subject, result.preview.body, previewStudent ? previewStudent.student_name : '');
+          if (previewStudentSelect && result.preview.student_id) {
+            previewStudentSelect.value = String(result.preview.student_id);
+          }
+        } else {
+          renderPreview('No preview available.', 'No at-risk students available in selected run.', '');
+        }
+
+        outreachStatus.textContent = 'Loaded ' + (counts.total || 0) + ' outreach-target students.';
+        renderFailureSummary([]);
+        await loadHistory();
+      }
+
+      async function previewSelectedEmail() {
+        if (!activeRunId) {
+          showToast('No active midterm run found.', true);
+          return;
+        }
+
+        const studentId = previewStudentSelect && previewStudentSelect.value ? Number(previewStudentSelect.value) : null;
+        if (!studentId) {
+          showToast('Please choose a student for preview.', true);
+          return;
+        }
+
+        try {
+          const result = await postJson(API.preview, {
+            run_id: activeRunId,
+            student_id: studentId,
+            subject_template: subjectTemplateInput.value,
+            body_template: bodyTemplateInput.value,
+            course_name: courseNameInput.value,
+            faculty_name: facultyNameInput.value,
+            institution_name: institutionNameInput.value,
+          });
+
+          const preview = result.preview || {};
+          const student = outreachStudents.find(function (entry) { return entry.id === studentId; });
+          renderPreview(preview.subject, preview.body, student ? student.student_name : '');
+          showToast('Email preview generated.', false);
+        } catch (error) {
+          showToast(error.message || 'Failed to generate preview.', true);
+        }
+      }
+
+      async function sendAlerts() {
+        if (!activeRunId) {
+          showToast('No active midterm run found.', true);
+          return;
+        }
+        if (!Array.isArray(outreachStudents) || outreachStudents.length === 0) {
+          showToast('No at-risk students found to send alerts.', true);
+          return;
+        }
+
+        const dispatchBatchId = String(Date.now()) + '-' + Math.floor(Math.random() * 100000);
+        const total = outreachStudents.length;
+        let sent = 0;
+        let failed = 0;
+        const failures = [];
+
+        setSendingState(true);
+        updateProgress(0, total);
+        outreachStatus.textContent = 'Starting alert dispatch...';
+
+        for (let index = 0; index < outreachStudents.length; index += 1) {
+          const student = outreachStudents[index];
+          updateProgress(index + 1, total);
+
+          try {
+            const result = await postJson(API.sendSingle, {
+              run_id: activeRunId,
+              student_id: student.id,
+              subject_template: subjectTemplateInput.value,
+              body_template: bodyTemplateInput.value,
+              course_name: courseNameInput.value,
+              faculty_name: facultyNameInput.value,
+              institution_name: institutionNameInput.value,
+              dispatch_batch_id: dispatchBatchId,
+            });
+
+            if (String(result.status || '').toLowerCase() === 'sent') {
+              sent += 1;
+            } else {
+              failed += 1;
+              failures.push({
+                student_name: student.student_name,
+                registration_no: student.registration_no,
+                error: (result.result && result.result.error) || 'SMTP delivery failed.',
+              });
+            }
+          } catch (error) {
+            failed += 1;
+            failures.push({
+              student_name: student.student_name,
+              registration_no: student.registration_no,
+              error: error.message || 'Request failed while sending email.',
+            });
+          }
+        }
+
+        let summaryError = '';
+        try {
+          const summaryResult = await postJson(API.sendSummary, {
+            run_id: activeRunId,
+            course_name: courseNameInput.value,
+            faculty_name: facultyNameInput.value,
+            institution_name: institutionNameInput.value,
+            dispatch_batch_id: dispatchBatchId,
+          });
+          if (String(summaryResult.status || '').toLowerCase() !== 'sent') {
+            summaryError = summaryResult.error || 'Faculty summary email failed.';
+          }
+        } catch (error) {
+          summaryError = error.message || 'Faculty summary email failed.';
+        }
+
+        updateProgress(total, total);
+        setSendingState(false);
+
+        renderFailureSummary(failures);
+
+        outreachStatus.textContent = 'Alerts successfully sent to ' + sent + ' students. ' + failed + ' failed.' +
+          (summaryError ? (' Faculty summary issue: ' + summaryError) : '');
+
+        if (failed > 0 || summaryError) {
+          showToast('Dispatch finished with some failures. Review Error Summary.', true);
+        } else {
+          showToast('All outreach alerts sent successfully.', false);
+        }
+
+        await loadHistory();
+      }
+
+      async function resendFailedStudents() {
+        if (!activeRunId) {
+          showToast('No active run found.', true);
+          return;
+        }
+
+        setSendingState(true);
+        outreachStatus.textContent = 'Resending failed outreach emails...';
+
+        try {
+          const result = await postJson(API.resendFailed, {
+            run_id: activeRunId,
+            subject_template: subjectTemplateInput.value,
+            body_template: bodyTemplateInput.value,
+            course_name: courseNameInput.value,
+            faculty_name: facultyNameInput.value,
+            institution_name: institutionNameInput.value,
+          });
+
+          const failedRows = (result.results || []).filter(function (row) {
+            return String(row.status || '').toLowerCase() !== 'sent';
+          }).map(function (row) {
+            return {
+              student_name: row.student_name,
+              registration_no: row.registration_no,
+              error: row.error,
+            };
+          });
+
+          renderFailureSummary(failedRows);
+          outreachStatus.textContent = 'Resend complete. Sent: ' + (result.sent || 0) + ', Failed: ' + (result.failed || 0) + '.';
+          showToast('Resend operation completed.', (result.failed || 0) > 0);
+          await loadHistory();
+        } catch (error) {
+          outreachStatus.textContent = error.message || 'Failed to resend failed students.';
+          showToast(error.message || 'Failed to resend failed students.', true);
+        } finally {
+          setSendingState(false);
+        }
+      }
+
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+          loadAtRiskStudents().catch(function (error) {
+            outreachStatus.textContent = error.message || 'Failed to load outreach data.';
+            showToast(error.message || 'Failed to load outreach data.', true);
+          });
+        });
+      }
+
+      if (previewBtn) {
+        previewBtn.addEventListener('click', function () {
+          previewSelectedEmail();
+        });
+      }
+
+      if (sendAlertsBtn) {
+        sendAlertsBtn.addEventListener('click', function () {
+          sendAlerts();
+        });
+      }
+
+      if (resendFailedBtn) {
+        resendFailedBtn.addEventListener('click', function () {
+          resendFailedStudents();
+        });
+      }
+
+      loadAtRiskStudents().catch(function (error) {
+        outreachStatus.textContent = error.message || 'Failed to load outreach data.';
+        showToast(error.message || 'Failed to load outreach data.', true);
+      });
+    })();
+  </script>
+</body>
+
+</html>
